@@ -18,18 +18,22 @@ public class PlayerManager : MonoBehaviour
         Ray ray = Camera.ScreenPointToRay(Input.mousePosition);
 
         if (Physics.Raycast(ray, out hit)) {
-            Transform objectHit = hit.transform;
+            GameObject objectHit = hit.transform.parent.gameObject;
 
-            if (objectHit.gameObject.layer == LayerMask.NameToLayer(Layers.PlayerCard.getString())) {
-                //TODO: levantar y alejar las demas cartas
+            GameObject _cardToRise = null;
+
+            if (objectHit.layer == LayerMask.NameToLayer(Layers.PlayerCard.getString())) {
+                _cardToRise = objectHit;
             }
 
+            DeckManager.riseCardFromDeck(_cardToRise);
+
             if (Input.GetMouseButtonDown(0)) {
-                if (objectHit.gameObject.layer == LayerMask.NameToLayer(Layers.PlayerCard.getString())) {
-                    //enviar carta al centro de la mesa
-                } else if (objectHit.gameObject.layer == LayerMask.NameToLayer(Layers.CenterDeck.getString())) {
+                if (objectHit.layer == LayerMask.NameToLayer(Layers.PlayerCard.getString())) {
+                    DeckManager.removeCardFromDeck(objectHit);
+                    //TODO: enviar carta al centro de la mesa
+                } else if (objectHit.layer == LayerMask.NameToLayer(Layers.CenterDeck.getString())) {
                     var card = GameManager.getCard();
-                    Debug.Log(card.first.getString() + "_" + card.second.getString());
                     GameObject newCard = Instantiate(CardPrefab, new Vector3(0,0,0), Quaternion.identity);
 
                     DeckManager.addNewCardToDeck(newCard, card);
@@ -39,10 +43,6 @@ public class PlayerManager : MonoBehaviour
             }
 
         }
-    }
-    void Start()
-    {
-        
     }
 
     // Update is called once per frame

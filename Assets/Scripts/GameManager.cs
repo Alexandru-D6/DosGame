@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
 
     public void addCard(CardType a, CardColor b) {
         AvailablesCards.Add(new Pair<CardType, CardColor>(a, b));
+        RemainingCards = AvailablesCards.Count;
     }
 
     void Start()
@@ -48,7 +49,6 @@ public class GameManager : MonoBehaviour
 
         if (RemainingCards > 0) {
             var temp = getCard();
-            Debug.Log(temp.first.getString() + "_" + temp.second.getString() + " ----> " + AvailablesCards.Count);
             newCard = false;
         }
     }

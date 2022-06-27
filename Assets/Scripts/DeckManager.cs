@@ -5,11 +5,19 @@ using UnityEngine;
 public class DeckManager : MonoBehaviour
 {
     //List<Pair<Pair<CardType, CardColor>, GameObject>> PlayerCards = new List<Pair<Pair<CardType, CardColor>, GameObject>>();
+    private GameObject _risedCard;
+    private GameManager GameManager;
+
+    private void Start() {
+        GameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+    }
 
     private void newCard(GameObject newCard, Pair<CardType, CardColor> card) {
         for (int i = transform.childCount-2; i >= 0; --i) {
             CardManager childCard = transform.GetChild(i).GetComponent<CardManager>();
-            if (childCard.CardColor < card.second && childCard.CardType < card.first) newCard.transform.SetSiblingIndex(i);
+            if ((childCard.CardColor.getIndex() >= card.second.getIndex() && childCard.CardType.getIndex() >= card.first.getIndex()) || childCard.CardColor.getIndex() > card.second.getIndex()) {
+                newCard.transform.SetSiblingIndex(i);
+            }
         }
     }
 
@@ -24,7 +32,6 @@ public class DeckManager : MonoBehaviour
         for (int i = 0; i < transform.childCount; ++i) {
             CardManager childCard = transform.GetChild(i).GetComponent<CardManager>();
 
-            childCard.setAngle(0.0f);
             childCard.setZ(initZ);
             childCard.setAngle(initAngle);
 
@@ -41,9 +48,29 @@ public class DeckManager : MonoBehaviour
         this.reorganizeCards();
     }
 
+    public void removeCardFromDeck(GameObject Card) {
+        GameManager.addCard(Card.GetComponent<CardManager>().CardType, Card.GetComponent<CardManager>().CardColor);
+        Destroy(Card.gameObject);
+
+        this.reorganizeCards();
+    }
+
     public void removeAllCards() {
         foreach(var child in transform.GetComponentsInChildren<CardManager>()) {
+            GameManager.addCard(child.GetComponent<CardManager>().CardType, child.GetComponent<CardManager>().CardColor);
             Destroy(child.gameObject);
+        }
+    }
+
+    public void riseCardFromDeck(GameObject risedCard) {
+        if (_risedCard != risedCard ) {
+            if (_risedCard != null) {
+                _risedCard.GetComponent<CardManager>().sitCard();
+            }
+            _risedCard = risedCard;
+            if (_risedCard != null) {
+                _risedCard.GetComponent<CardManager>().riseCard();
+            }
         }
     }
 }
