@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
 
     public List<Pair<CardType, CardColor>> AvailablesCards = new List<Pair<CardType, CardColor>>();
 
+    [SerializeField] MiddleManager MiddleManager;
+
     void initAvailablesCards() {
         RemainingCards = 108 * NrDecks;
 
@@ -43,6 +45,8 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         initAvailablesCards();
+
+        MiddleManager.addCard(this.getCard());
     }
 
     void printCard() {

@@ -16,14 +16,25 @@ public class CardManager : MonoBehaviour {
 
     private bool _isRised = false;
 
+    private void Start() {
+        changeCard(CardType, CardColor);
+    }
+
     public void setAngle(float angle) {
         float sign = 1.0f;
         if (angle < 0.0f) sign = -1.0f;
 
         this.transform.localEulerAngles = new Vector3(0,0,sign * Mathf.Min(Mathf.Abs(angle), MaxAngle));
+        //TODO: Maybe add some rotation to the card to feel them as being in real life(?)
         //Cube.transform.localEulerAngles = new Vector3(0,-1.0f * sign * Mathf.Min((Mathf.Abs(angle) * MaxRotation)/MaxAngle, MaxRotation), 0);
 
         angle = sign * Mathf.Min(Mathf.Abs(angle), MaxAngle);
+    }
+
+    public float getAngle() {
+        float res = this.transform.localEulerAngles.z;
+        if (res > MaxAngle*2.0f) res -= 360.0f;
+        return res;
     }
 
     public void setZ(float z) {
