@@ -13,7 +13,9 @@ public class PlayerManager : MonoBehaviour
 
     [SerializeField] GameObject CardPrefab;
 
-    void calculateRayCast() {
+    private RoundInfo _roundInfo = new RoundInfo(false, false, false);
+
+    private void calculateRayCast() {
         RaycastHit hit;
         Ray ray = Camera.ScreenPointToRay(Input.mousePosition);
 
@@ -22,7 +24,7 @@ public class PlayerManager : MonoBehaviour
 
             GameObject _cardToRise = null;
 
-            if (objectHit.layer == LayerMask.NameToLayer(Layers.PlayerCard.getString())) {
+            if (objectHit.layer == LayerMask.NameToLayer(Layers.PlayerCard.getString()) && _roundInfo.isHisTurn) {
                 _cardToRise = objectHit;
             }
 
@@ -30,24 +32,40 @@ public class PlayerManager : MonoBehaviour
 
             if (Input.GetMouseButtonDown(0)) {
                 if (objectHit.layer == LayerMask.NameToLayer(Layers.PlayerCard.getString())) {
-                    DeckManager.removeCardFromDeck(objectHit);
-                    //TODO: enviar carta al centro de la mesa
+                    if (DeckManager.removeCardFromDeck(objectHit, _roundInfo)) {
+                        GameManager.finishedTurn();
+                    }else {
+                        //TODO: some wiggle to notify that move is incorrect
+                    }
                 } else if (objectHit.layer == LayerMask.NameToLayer(Layers.CenterDeck.getString())) {
-                    var card = GameManager.getCard();
-                    GameObject newCard = Instantiate(CardPrefab, new Vector3(0,0,0), Quaternion.identity);
-
-                    DeckManager.addNewCardToDeck(newCard, card);
+                    drawCards();
                 }
             }else if (Input.GetMouseButtonDown(1)) {
                 DeckManager.removeAllCards();
             }
-
         }
+    }
+
+    public void drawCards() {
+        var cards = GameManager.drawCards(_roundInfo);
+
+        foreach(var card in cards) {
+            GameObject newCard = Instantiate(CardPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+            DeckManager.addNewCardToDeck(newCard, card);
+        }
+
+        if (_roundInfo.hasToDraw) GameManager.finishedTurn();
+    }
+
+    public void giveTurn(RoundInfo roundInfo) {
+        _roundInfo = roundInfo;
     }
 
     // Update is called once per frame
     private void Update()
     {
-        calculateRayCast();
+        if (_roundInfo.isHisTurn) {
+            calculateRayCast();
+        }
     }
 }

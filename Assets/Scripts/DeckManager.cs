@@ -71,14 +71,16 @@ public class DeckManager : MonoBehaviour
         this.reorganizeCards();
     }
 
-    public void removeCardFromDeck(GameObject Card) {
-        if (MiddleManager.addCard(new Pair<CardType, CardColor>(Card.GetComponent<CardManager>().CardType, Card.GetComponent<CardManager>().CardColor))) {
+    public bool removeCardFromDeck(GameObject Card, RoundInfo roundInfo) {
+        if (MiddleManager.addCard(Card.GetComponent<CardManager>().getInfo(), roundInfo)) {
             Card.transform.SetParent(null);
             Destroy(Card);
 
             this.reorganizeCards();
+            return true;
         }else {
             //TODO: some wiggle to notify that move is incorrect
+            return false;
         }
     }
 

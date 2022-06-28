@@ -14,10 +14,14 @@ public class CardManager : MonoBehaviour {
     [SerializeField] public CardType CardType;
     [SerializeField] public CardColor CardColor;
 
+    public Pair<CardType, CardColor> getInfo() {
+        return new Pair<CardType, CardColor>(CardType, CardColor);
+    }
+
     private bool _isRised = false;
 
     private void Start() {
-        changeCard(CardType, CardColor);
+        changeCard(new Pair<CardType, CardColor>(CardType, CardColor));
     }
 
     public void setAngle(float angle) {
@@ -53,12 +57,12 @@ public class CardManager : MonoBehaviour {
 
     public bool isRised() { return _isRised; }
 
-    public void changeCard(CardType value, CardColor color) {
+    public void changeCard(Pair<CardType, CardColor> infoCard) {
 
-        CardType = value;
-        CardColor = color;
+        CardType = infoCard.first;
+        CardColor = infoCard.second;
 
-        string card = value.getString() + "_" + color.getString();
+        string card = infoCard.first.getString() + "_" + infoCard.second.getString();
 
         Texture2D tex = null;
         byte[] fileData;
@@ -73,7 +77,7 @@ public class CardManager : MonoBehaviour {
     }
 
     public void initCard(Pair<CardType, CardColor> card) {
-        changeCard(card.first, card.second);
+        changeCard(card);
         transform.localPosition = new Vector3(0, -5, 0);
         setAngle(0.0f);
     }
