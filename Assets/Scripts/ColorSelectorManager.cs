@@ -36,7 +36,7 @@ public class ColorSelectorManager : MonoBehaviour
 
             if (Input.GetMouseButtonDown(0)) {
                 if (objectHit.layer == LayerMask.NameToLayer(Layers.ColorSelector.getString())) {
-                    MiddleManager.changeColorMiddleCard(objectHit.GetComponent<Color>().CardColor);
+                    MiddleManager.changeColorMiddleCard(objectHit.GetComponent<CardColorSelector>().CardColor);
                     Destroy(gameObject);
                     TextMesh.SetActive(_initTextMeshState);
                     GameManager.finishedTurn();
