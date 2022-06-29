@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
     }
 
     public List<Pair<CardType, CardColor>> drawCards(RoundInfo roundInfo) {
-        if (roundInfo.isHisTurn) {
+        if (roundInfo.isHisTurn || _currentTurn == -1) {
             List<Pair<CardType, CardColor>> res = new List<Pair<CardType, CardColor>>();
             
             if (roundInfo.hasToDraw) {
@@ -63,30 +63,50 @@ public class GameManager : MonoBehaviour
     {
         initAvailablesCards();
 
-        MiddleManager.addCard(this.drawCards(new RoundInfo(true, false, false))[0], new RoundInfo(true,false,false));
+        MiddleManager.addCard(this.drawCards(new RoundInfo(true, false, false, true))[0], new RoundInfo(true,false,false,true ));
+
+        if (MiddleManager.getMiddleColor() == CardColor.Black) MiddleManager.changeColorMiddleCard(Enumerations.getRandomColor(0,3));
 
         _players = new List<GameObject>();
         //refactor to add multi
         _players.Add(GameObject.FindGameObjectWithTag("Player"));
+
+        foreach (var player in _players) {
+            player.GetComponent<PlayerManager>().initPlayer();
+        }
+
         nextTurn();
     }
 
     void printCard() {
 
         if (RemainingCards > 0) {
-            var temp = drawCards(new RoundInfo(true, false, false))[0];
+            var temp = drawCards(new RoundInfo(true, false, false, true))[0];
             newCard = false;
         }
     }
 
+    public bool currentPlayer() {
+        return true;
+    }
+
     void nextTurn() {
+        _senseGame = MiddleManager.hasRevers();
+
         if (_senseGame) {
             _currentTurn++;
             if (_currentTurn == _players.Count) _currentTurn = 0;
+        }else {
+            _currentTurn--;
+            if (_currentTurn < 0) _currentTurn = _players.Count - 1;
         }
 
 
-        _players[_currentTurn].GetComponent<PlayerManager>().giveTurn(new RoundInfo(true, MiddleManager.getCurrentWithdraw() > 0, false));
+        _players[_currentTurn].GetComponent<PlayerManager>().giveTurn(new RoundInfo(true, MiddleManager.getCurrentWithdraw() > 0, MiddleManager.hasBlock(), false));
+    }
+
+    public bool selectingColor() {
+        return MiddleManager.transform.Find("ColorSelector(Clone)") != null;
     }
 
     public void finishedTurn() {

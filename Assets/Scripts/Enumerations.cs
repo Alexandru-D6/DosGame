@@ -41,7 +41,9 @@ public enum Layers
     Water,
     UI,
     CenterDeck,
-    PlayerCard
+    PlayerCard,
+    MiddleCard,
+    ColorSelector
 }
 public static class Enumerations
 {
@@ -87,8 +89,14 @@ public static class Enumerations
         }
     }
 
-    public static CardType getRandomType() {
-        return (CardType)Random.Range(0,14);
+    /// <summary>
+    /// Get random Type of Card [0,14]
+    /// </summary>
+    /// <param name="minInclusive"></param>
+    /// <param name="maxInclusive"></param>
+    /// <returns></returns>
+    public static CardType getRandomType(int minInclusive, int maxInclusive) {
+        return (CardType)Random.Range(minInclusive, maxInclusive);
     }
 
     public static CardType getTypeByIndex(int index) {
@@ -117,8 +125,14 @@ public static class Enumerations
         }
     }
 
-    public static CardColor getRandomColor() {
-        return (CardColor)Random.Range(0, 4);
+    /// <summary>
+    /// Get random Color of Card [0,4]
+    /// </summary>
+    /// <param name="minInclusive"> </param>
+    /// <param name="maxInclusive"> </param>
+    /// <returns></returns>
+    public static CardColor getRandomColor(int minInclusive, int maxInclusive) {
+        return (CardColor)Random.Range(minInclusive, maxInclusive);
     }
 
     public static CardColor getColorByIndex(int index) {
@@ -134,6 +148,8 @@ public static class Enumerations
             case Layers.UI: return "UI";
             case Layers.CenterDeck: return "Center Deck";
             case Layers.PlayerCard: return "Player Card";
+            case Layers.MiddleCard: return "Middle Card";
+            case Layers.ColorSelector: return "Color Selector";
             default: return "Default";
         }
     }

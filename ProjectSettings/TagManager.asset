@@ -8,6 +8,7 @@ TagManager:
   - CenterDeck
   - GameManager
   - MiddleCard
+  - WithdrawCounter
   layers:
   - Default
   - TransparentFX
@@ -19,7 +20,7 @@ TagManager:
   - Center Deck
   - Player Card
   - Middle Card
-  - 
+  - Color Selector
   - 
   - 
   - 

@@ -10,10 +10,12 @@ public class PlayerManager : MonoBehaviour
 
     [SerializeField] GameObject Deck;
 
+    [SerializeField] int InitCards;
 
     [SerializeField] GameObject CardPrefab;
+    [SerializeField] GameObject BlockPrefab;
 
-    private RoundInfo _roundInfo = new RoundInfo(false, false, false);
+    private RoundInfo _roundInfo = new RoundInfo(false, false, false, false);
 
     private void calculateRayCast() {
         RaycastHit hit;
@@ -32,7 +34,7 @@ public class PlayerManager : MonoBehaviour
 
             if (Input.GetMouseButtonDown(0)) {
                 if (objectHit.layer == LayerMask.NameToLayer(Layers.PlayerCard.getString())) {
-                    if (DeckManager.removeCardFromDeck(objectHit, _roundInfo)) {
+                    if (DeckManager.removeCardFromDeck(objectHit, _roundInfo) && !GameManager.selectingColor()) {
                         GameManager.finishedTurn();
                     }else {
                         //TODO: some wiggle to notify that move is incorrect
@@ -57,8 +59,27 @@ public class PlayerManager : MonoBehaviour
         if (_roundInfo.hasToDraw) GameManager.finishedTurn();
     }
 
+    private void spawnBlock() {
+        GameObject block = Instantiate(BlockPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+        block.transform.SetParent(transform);
+        block.transform.localPosition = new Vector3(0.0f,2.0f,-6.2f);
+        //Change color material and program autodelete
+    }
+
     public void giveTurn(RoundInfo roundInfo) {
         _roundInfo = roundInfo;
+
+        if (roundInfo.isBlocked) {
+            //show block 
+            spawnBlock();
+            GameManager.finishedTurn();
+        }
+    }
+
+    public void initPlayer() {
+        for(int i = 0; i < InitCards; ++i) {
+            drawCards();
+        }
     }
 
     // Update is called once per frame
