@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Photon.Pun;
+using Photon.Realtime;
 
-public class MiddleManager : MonoBehaviour
+public class MiddleManager : MonoBehaviourPunCallbacks
 {
 
     [SerializeField] GameManager GameManager;
@@ -16,22 +18,6 @@ public class MiddleManager : MonoBehaviour
 
     private int _currentWithdraw = 0;
     private bool _usedMiddleCard = false;
-
-    private bool validCard(Pair<CardType, CardColor> oldC, Pair<CardType, CardColor> newC, RoundInfo roundInfo) {
-        //default
-        if (roundInfo.isHisTurn && !roundInfo.isBlocked) {
-            if (roundInfo.hasToDraw) {
-                if (newC.first == CardType.Cplus2 || newC.first == CardType.Cplus4) return true;
-            }else {
-                if (oldC.first == newC.first) return true;
-                if (oldC.second == newC.second) return true;
-
-                if (newC.second == CardColor.Black) return true;
-            }
-        }
-
-        return false;
-    }
 
     private void incrementWithdraw(Pair<CardType, CardColor> newC) {
         if (newC.first == CardType.Cplus2) _currentWithdraw += 2;
@@ -61,14 +47,40 @@ public class MiddleManager : MonoBehaviour
         }
     }
 
-    public bool addCard(Pair<CardType, CardColor> newC, RoundInfo roundInfo) {
+    public bool validCard(Pair<CardType, CardColor> newC, RoundInfo roundInfo) {
         Pair<CardType, CardColor> oldC = new Pair<CardType, CardColor>(CardType.C0, CardColor.Blue);
 
         if (transform.childCount > 1) {
             oldC = transform.GetChild(0).GetComponent<CardManager>().getInfo();
         }
+        Debug.Log("Validation -->");
+        Debug.Log(oldC.first + " -- " + oldC.second);
+        Debug.Log(newC.first + " -- " + newC.second);
 
-        if (transform.childCount == 1 || (transform.childCount > 1 && validCard(oldC, newC, roundInfo))) {
+        Debug.Log(roundInfo.isHisTurn + " -- " + roundInfo.isBlocked + " -- " + roundInfo.hasToDraw);
+
+        //default
+        if (roundInfo.isHisTurn && !roundInfo.isBlocked) {
+            Debug.Log(roundInfo.isHisTurn + " -- " + roundInfo.isBlocked + " -- " + roundInfo.hasToDraw);
+            if (roundInfo.hasToDraw) {
+                if (newC.first == CardType.Cplus2 || newC.first == CardType.Cplus4) return true;
+            } else {
+                if (oldC.first == newC.first) return true;
+                if (oldC.second == newC.second) return true;
+                if (newC.second == CardColor.Black) return true;
+            }
+        }
+
+        return false;
+    }
+
+    [PunRPC]
+    public void addCardMiddle(CardType newCa, CardColor newCb, RoundInfo roundInfo) {
+        Debug.Log("intentando añadir carta!");
+        Pair<CardType, CardColor> newC = new Pair<CardType, CardColor>(newCa, newCb);
+
+        Debug.Log(validCard(newC, roundInfo));
+        if (transform.childCount == 1 || (transform.childCount > 1)) {
             _usedMiddleCard = false;
             moveAllCardsDown();
             GameObject newCard = Instantiate(CardPrefab, new Vector3(0, 0, 0), Quaternion.identity);
@@ -83,10 +95,7 @@ public class MiddleManager : MonoBehaviour
             incrementWithdraw(newC);
             senseChanged(newC);
             if (!roundInfo.automaticPlay) colorChangeNeeded(newC);
-
-            return true;
-        }else {
-            return false;
+            Debug.Log("conseguido");
         }
     }
 
@@ -132,6 +141,7 @@ public class MiddleManager : MonoBehaviour
         return false;
     }
 
+    [PunRPC]
     public void changeColorMiddleCard(CardColor color) {
         if (transform.childCount > 1 && getMiddleColor() == CardColor.Black) {
             transform.GetChild(0).GetComponent<CardManager>().changeCard(new Pair<CardType, CardColor>(getMiddleType(), color));
@@ -141,7 +151,8 @@ public class MiddleManager : MonoBehaviour
     void moveAllCardsDown() {
         if (transform.childCount > 5) {
             CardManager toDelete = transform.GetChild(4).GetComponent<CardManager>();
-            GameManager.addCard(toDelete.CardType, (toDelete.CardType == CardType.Cplus4 || toDelete.CardType == CardType.CChangeColor) ? CardColor.Black : toDelete.CardColor);
+            GameManager.GetComponent<PhotonView>().RPC("addCard", RpcTarget.AllViaServer, toDelete.CardType, (toDelete.CardType == CardType.Cplus4 || toDelete.CardType == CardType.CChangeColor) ? CardColor.Black : toDelete.CardColor);
+            //GameManager.addCard(toDelete.CardType, (toDelete.CardType == CardType.Cplus4 || toDelete.CardType == CardType.CChangeColor) ? CardColor.Black : toDelete.CardColor);
 
             toDelete.transform.SetParent(null);
             Destroy(toDelete.gameObject);

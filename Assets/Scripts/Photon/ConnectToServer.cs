@@ -4,11 +4,16 @@ using UnityEngine;
 using Photon.Pun;
 using TMPro;
 using UnityEngine.SceneManagement;
+using ExitGames.Client.Photon;
 
 public class ConnectToServer : MonoBehaviourPunCallbacks
 {
     [SerializeField] TMP_InputField usernameInput;
     [SerializeField] TMP_Text buttonText;
+
+    private void Start() {
+        PhotonPeer.RegisterType(typeof(RoundInfo), (byte)'A', RoundInfo.SerializeRoundInfo, RoundInfo.DeserializeRoundInfo);
+    }
 
     public void OnClickConnect() {
         if (usernameInput.text.Length >= 3) {

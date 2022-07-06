@@ -25,6 +25,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     [SerializeField] Transform playerItemListing;
 
     [SerializeField] GameObject playButton;
+    [SerializeField] int minPlayers = 1;
 
     public void Awake() {
         lobbyPanel.SetActive(true);
@@ -118,7 +119,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     }
 
     private void Update() {
-        if (PhotonNetwork.IsMasterClient && PhotonNetwork.CurrentRoom.PlayerCount >= 2) {
+        if (PhotonNetwork.IsMasterClient && PhotonNetwork.CurrentRoom.PlayerCount >= minPlayers) {
             playButton.SetActive(true);
         }else {
             playButton.SetActive(false);

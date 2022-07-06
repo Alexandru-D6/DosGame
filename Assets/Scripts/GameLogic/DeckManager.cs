@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
+using Photon.Realtime;
 
-public class DeckManager : MonoBehaviour
+public class DeckManager : MonoBehaviourPunCallbacks
 {
     //List<Pair<Pair<CardType, CardColor>, GameObject>> PlayerCards = new List<Pair<Pair<CardType, CardColor>, GameObject>>();
     private GameObject _risedCard;
@@ -14,6 +16,7 @@ public class DeckManager : MonoBehaviour
 
     private void Start() {
         GameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+        MiddleManager = GameObject.FindGameObjectWithTag("MiddleCard").GetComponent<MiddleManager>();
     }
 
     //TODO: implement Binary Search to improve performance
@@ -71,12 +74,40 @@ public class DeckManager : MonoBehaviour
         this.reorganizeCards();
     }
 
-    public bool removeCardFromDeck(GameObject Card, RoundInfo roundInfo) {
-        if (MiddleManager.addCard(Card.GetComponent<CardManager>().getInfo(), roundInfo)) {
-            Card.transform.SetParent(null);
-            Destroy(Card);
+    GameObject findChildCard(Pair<CardType, CardColor> Card) {
+        foreach(var card in transform.GetComponentsInChildren<CardManager>()) {
+            if (card.getInfo() == Card) {
+                return card.gameObject;
+            }
+        }
+        return null;
+    }
 
-            this.reorganizeCards();
+    [PunRPC]
+    public void deleteCardFromDeck(CardType a, CardColor b, RoundInfo roundInfo) {
+        Pair<CardType, CardColor> Card = new Pair<CardType, CardColor>(a, b);
+
+        GameObject deckCard = findChildCard(Card);
+
+        if (deckCard != null) {
+            deckCard.transform.SetParent(null);
+            Destroy(deckCard);
+        } else {
+            Debug.Log("error");
+        }
+
+        this.reorganizeCards();
+    }
+
+    //TODO: separarlo en dos para hacer directamente la llamada punRPC desde player manager
+    public bool removeCardFromDeck(GameObject Card, RoundInfo roundInfo) {
+        Pair<CardType, CardColor> card = Card.GetComponent<CardManager>().getInfo();
+        if (MiddleManager.validCard(card, roundInfo)) {
+            Debug.Log(roundInfo);
+            Debug.Log(roundInfo.isHisTurn + " -- " + roundInfo.isBlocked + " -- " + roundInfo.hasToDraw);
+            MiddleManager.GetComponent<PhotonView>().RPC("addCardMiddle", RpcTarget.AllViaServer, card.first, card.second, roundInfo);
+            PhotonView.Get(this).RPC("deleteCardFromDeck", RpcTarget.AllViaServer, card.first, card.second, roundInfo);
+
             return true;
         }else {
             //TODO: some wiggle to notify that move is incorrect
