@@ -1,5 +1,9 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 using ExitGames.Client.Photon;
 using System;
+using System.Text;
 
 [System.Serializable]
 public class RoundInfo {
@@ -7,9 +11,9 @@ public class RoundInfo {
     public bool hasToDraw;
     public bool isBlocked;
     public bool automaticPlay;
-    public int playerID;
+    public short playerID;
 
-    public RoundInfo(bool iHT, bool hTD, bool iB, bool aP, int p) {
+    public RoundInfo(bool iHT, bool hTD, bool iB, bool aP, short p) {
         isHisTurn = iHT;
         hasToDraw = hTD;
         isBlocked = iB;
@@ -39,7 +43,10 @@ public class RoundInfo {
             Protocol.Serialize(Convert.ToInt16(vo.isBlocked), bytes, ref index);
             Protocol.Serialize(Convert.ToInt16(vo.automaticPlay), bytes, ref index);
             Protocol.Serialize(vo.playerID, bytes, ref index);
+            Debug.Log("1---> " + vo.playerID);
+            Debug.Log("Bytes: " + string.Join(" ", bytes));
             outStream.Write(bytes, 0, SizeRoundInfo);
+            
         }
 
         return SizeRoundInfo;
@@ -54,7 +61,10 @@ public class RoundInfo {
         lock (memRoundInfo) {
             inStream.Read(memRoundInfo, 0, SizeRoundInfo);
             int index = 0;
-            int temp;
+            short temp;
+
+            Debug.Log("Bytes1: " + string.Join(" ", memRoundInfo));
+
             Protocol.Deserialize(out temp, memRoundInfo, ref index);
             vo.isHisTurn = Convert.ToBoolean(temp);
             Protocol.Deserialize(out temp, memRoundInfo, ref index);
@@ -64,6 +74,7 @@ public class RoundInfo {
             Protocol.Deserialize(out temp, memRoundInfo, ref index);
             vo.automaticPlay = Convert.ToBoolean(temp);
             Protocol.Deserialize(out vo.playerID, memRoundInfo, ref index);
+            Debug.Log("2--->" + vo.playerID);
         }
 
         return vo;

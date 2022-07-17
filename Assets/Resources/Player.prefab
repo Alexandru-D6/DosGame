@@ -126,6 +126,12 @@ MonoBehaviour:
   InitCards: 5
   CardPrefab: {fileID: 3954032906239742334, guid: 77357ef92e3637143a8901e8a1acdb09, type: 3}
   BlockPrefab: {fileID: 7752527693510198521, guid: e5aea88168a3c8744b0b73e56c701803, type: 3}
+  _roundInfo:
+    isHisTurn: 0
+    hasToDraw: 0
+    isBlocked: 0
+    automaticPlay: 0
+    playerID: -1
 --- !u!114 &8607672270155644759
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using System;
 
 public class PlayerManager : MonoBehaviourPunCallbacks
 {
@@ -17,7 +18,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     [SerializeField] GameObject CardPrefab;
     [SerializeField] GameObject BlockPrefab;
 
-    private RoundInfo _roundInfo = new RoundInfo(false, false, false, false, -1);
+    [SerializeField] RoundInfo _roundInfo = new RoundInfo(false, false, false, false, -1);
 
     private void Start() {
         GameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
@@ -42,6 +43,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
                 if (objectHit.layer == LayerMask.NameToLayer(Layers.PlayerCard.getString())) {
                     if (DeckManager.removeCardFromDeck(objectHit, _roundInfo) && !GameManager.selectingColor()) {
                         GameManager.GetComponent<PhotonView>().RPC("finishedTurn", RpcTarget.AllViaServer);//GameManager.finishedTurn();
+                        _roundInfo.isHisTurn = false;
                     } else {
                         //TODO: some wiggle to notify that move is incorrect
                     }
@@ -61,7 +63,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             PhotonView.Get(this).RPC("SpawnCard", RpcTarget.AllViaServer, card.first, card.second, playerID);
         }
 
-        if (_roundInfo.hasToDraw && PhotonView.Get(this).IsMine) GameManager.GetComponent<PhotonView>().RPC("finishedTurn", RpcTarget.AllViaServer);//GameManager.finishedTurn();
+        if (_roundInfo.hasToDraw && PhotonView.Get(this).IsMine) {
+            GameManager.GetComponent<PhotonView>().RPC("finishedTurn", RpcTarget.AllViaServer);//GameManager.finishedTurn();
+            _roundInfo.isHisTurn = false;
+        }
     }
 
     [PunRPC]
@@ -69,6 +74,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         if (PhotonView.Get(this).ViewID == playerID) {
             GameObject newCard = Instantiate(CardPrefab, new Vector3(0, 0, 0), Quaternion.identity);
             DeckManager.addNewCardToDeck(newCard, new Pair<CardType, CardColor>(a,b));
+
+            if (!PhotonView.Get(this).IsMine) {
+                newCard.layer = (int)Layers.IgnoreRayCast;
+            }
         }
     }
 
@@ -81,20 +90,25 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     [PunRPC]
     public void giveTurn(RoundInfo roundInfo) {
-        _roundInfo = roundInfo;
+        Debug.Log("hello there");
+        Debug.Log("-->" + PhotonView.Get(this).ViewID + " - "+ roundInfo.playerID + " - " + roundInfo.isHisTurn);
+        if (PhotonView.Get(this).ViewID == roundInfo.playerID) {
+            _roundInfo = roundInfo;
 
-        if (roundInfo.isBlocked) {
-            //show block 
-            spawnBlock();
-            GameManager.GetComponent<PhotonView>().RPC("finishedTurn", RpcTarget.AllViaServer);
-            //GameManager.finishedTurn();
+            if (roundInfo.isBlocked) {
+                //show block 
+                spawnBlock();
+                GameManager.GetComponent<PhotonView>().RPC("finishedTurn", RpcTarget.AllViaServer);
+                _roundInfo.isHisTurn = false;
+                //GameManager.finishedTurn();
+            }
         }
     }
 
     [PunRPC]
     public void initPlayer(int playerID) {
         if (PhotonView.Get(this).ViewID == playerID && PhotonView.Get(this).IsMine) {
-            _roundInfo.playerID = playerID;
+            _roundInfo.playerID = Convert.ToInt16(playerID);
             for (int i = 0; i < InitCards; ++i) {
                 drawCards(playerID);
             }

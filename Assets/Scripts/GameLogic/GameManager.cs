@@ -114,7 +114,9 @@ public class GameManager : MonoBehaviourPunCallbacks
 
         //tendria que ser ejecutado solamente por el master
         if (PhotonNetwork.IsMasterClient) {
-            _players[_currentTurn].GetComponent<PlayerManager>().giveTurn(new RoundInfo(true, MiddleManager.getCurrentWithdraw() > 0, MiddleManager.hasBlock(), false, _players[_currentTurn].GetComponent<PhotonView>().ViewID));
+            Debug.Log(_players[_currentTurn].ViewID);
+            _players[_currentTurn].RPC("giveTurn", RpcTarget.AllViaServer, new RoundInfo(true, MiddleManager.getCurrentWithdraw() > 0, MiddleManager.hasBlock(), false, System.Convert.ToInt16(_players[_currentTurn].ViewID)));
+            //_players[_currentTurn].GetComponent<PlayerManager>().giveTurn(new RoundInfo(true, MiddleManager.getCurrentWithdraw() > 0, MiddleManager.hasBlock(), false, _players[_currentTurn].GetComponent<PhotonView>().ViewID));
         }
     }
 
@@ -135,6 +137,10 @@ public class GameManager : MonoBehaviourPunCallbacks
     [PunRPC]
     void PlayerCreated(int _player) {
         _players.Add(PhotonView.Find(_player));
+
+        if (!PhotonView.Find(_player).IsMine) {
+            PhotonView.Find(_player).GetComponentInChildren<Camera>().enabled = false;
+        }
 
         if (PhotonNetwork.IsMasterClient) {
             PhotonView.Find(_player).RPC("initPlayer", RpcTarget.AllViaServer, _player);

@@ -53,15 +53,15 @@ public class MiddleManager : MonoBehaviourPunCallbacks
         if (transform.childCount > 1) {
             oldC = transform.GetChild(0).GetComponent<CardManager>().getInfo();
         }
-        Debug.Log("Validation -->");
-        Debug.Log(oldC.first + " -- " + oldC.second);
-        Debug.Log(newC.first + " -- " + newC.second);
+        //Debug.Log("Validation -->");
+        //Debug.Log(oldC.first + " -- " + oldC.second);
+        //Debug.Log(newC.first + " -- " + newC.second);
 
-        Debug.Log(roundInfo.isHisTurn + " -- " + roundInfo.isBlocked + " -- " + roundInfo.hasToDraw);
+        //Debug.Log(roundInfo.isHisTurn + " -- " + roundInfo.isBlocked + " -- " + roundInfo.hasToDraw);
 
         //default
         if (roundInfo.isHisTurn && !roundInfo.isBlocked) {
-            Debug.Log(roundInfo.isHisTurn + " -- " + roundInfo.isBlocked + " -- " + roundInfo.hasToDraw);
+            //Debug.Log(roundInfo.isHisTurn + " -- " + roundInfo.isBlocked + " -- " + roundInfo.hasToDraw);
             if (roundInfo.hasToDraw) {
                 if (newC.first == CardType.Cplus2 || newC.first == CardType.Cplus4) return true;
             } else {
@@ -76,10 +76,10 @@ public class MiddleManager : MonoBehaviourPunCallbacks
 
     [PunRPC]
     public void addCardMiddle(CardType newCa, CardColor newCb, RoundInfo roundInfo) {
-        Debug.Log("intentando añadir carta!");
+        //Debug.Log("intentando añadir carta!");
         Pair<CardType, CardColor> newC = new Pair<CardType, CardColor>(newCa, newCb);
 
-        Debug.Log(validCard(newC, roundInfo));
+        //Debug.Log(validCard(newC, roundInfo));
         if (transform.childCount == 1 || (transform.childCount > 1)) {
             _usedMiddleCard = false;
             moveAllCardsDown();
@@ -95,7 +95,7 @@ public class MiddleManager : MonoBehaviourPunCallbacks
             incrementWithdraw(newC);
             senseChanged(newC);
             if (!roundInfo.automaticPlay) colorChangeNeeded(newC);
-            Debug.Log("conseguido");
+            //Debug.Log("conseguido");
         }
     }
 
