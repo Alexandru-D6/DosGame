@@ -132,6 +132,7 @@ MonoBehaviour:
     isBlocked: 0
     automaticPlay: 0
     playerID: -1
+    playerRotation: -1
 --- !u!114 &8607672270155644759
 MonoBehaviour:
   m_ObjectHideFlags: 0

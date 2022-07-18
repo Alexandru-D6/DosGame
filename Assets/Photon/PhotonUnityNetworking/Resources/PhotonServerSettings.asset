@@ -50,6 +50,12 @@ MonoBehaviour:
   - SpawnCard
   - initPlayer
   - deleteCardFromDeck
+  - useMiddleCard
+  - turnFinished
+  - turnBlocked
+  - resetWithdraw
+  - assignPlayerID
+  - destroyObject
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

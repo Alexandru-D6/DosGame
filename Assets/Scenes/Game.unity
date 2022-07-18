@@ -218,8 +218,9 @@ MonoBehaviour:
   GameManager: {fileID: 1549061557}
   CardPrefab: {fileID: 2063195443874550020, guid: 8bf5daa9c53c0014b9e7e13e5ec39614, type: 3}
   ReversPrefab: {fileID: 7856414549215131852, guid: 1d22ee6e3fd404a4f9f2657941521da2, type: 3}
-  ColorSelectorPrefab: {fileID: 2990229544816622614, guid: bbc19cde316e4d04a85fce435305a5a3, type: 3}
+  ColorSelectorPrefab: {fileID: 2990229544816622614, guid: bdf1d6cea6863874eafbf2861e10f88b, type: 3}
   WithdrawCounter: {fileID: 1700830161}
+  _usedMiddleCard: 0
 --- !u!114 &1109257468
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -336,6 +337,7 @@ MonoBehaviour:
   AvailablesCards: []
   MiddleManager: {fileID: 1109257467}
   _players: []
+  _currentTurn: -1
 --- !u!4 &1549061558
 Transform:
   m_ObjectHideFlags: 0

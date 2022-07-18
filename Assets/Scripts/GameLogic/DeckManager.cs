@@ -103,11 +103,12 @@ public class DeckManager : MonoBehaviourPunCallbacks
     public bool removeCardFromDeck(GameObject Card, RoundInfo roundInfo) {
         Pair<CardType, CardColor> card = Card.GetComponent<CardManager>().getInfo();
         if (MiddleManager.validCard(card, roundInfo)) {
-            Debug.Log(roundInfo);
-            Debug.Log(roundInfo.isHisTurn + " -- " + roundInfo.isBlocked + " -- " + roundInfo.hasToDraw);
+            //Debug.Log(roundInfo);
+            //Debug.Log(roundInfo.isHisTurn + " -- " + roundInfo.isBlocked + " -- " + roundInfo.hasToDraw);
             MiddleManager.GetComponent<PhotonView>().RPC("addCardMiddle", RpcTarget.AllViaServer, card.first, card.second, roundInfo);
             PhotonView.Get(this).RPC("deleteCardFromDeck", RpcTarget.AllViaServer, card.first, card.second, roundInfo);
 
+            if (card.second == CardColor.Black) return false;
             return true;
         }else {
             //TODO: some wiggle to notify that move is incorrect

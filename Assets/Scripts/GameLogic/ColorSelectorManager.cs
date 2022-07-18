@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
+using Photon.Realtime;
 
-public class ColorSelectorManager : MonoBehaviour
+public class ColorSelectorManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] Camera Camera;
     [SerializeField] MiddleManager MiddleManager;
@@ -12,6 +14,8 @@ public class ColorSelectorManager : MonoBehaviour
     private bool _initTextMeshState = false;
 
     [SerializeField] float incrementGameobject = 2.5f;
+
+    public int _playerID = -1;
 
     private GameObject _aumentedGO = null;
     private void calculateRayCast() {
@@ -36,13 +40,26 @@ public class ColorSelectorManager : MonoBehaviour
 
             if (Input.GetMouseButtonDown(0)) {
                 if (objectHit.layer == LayerMask.NameToLayer(Layers.ColorSelector.getString())) {
-                    MiddleManager.changeColorMiddleCard(objectHit.GetComponent<CardColorSelector>().CardColor);
-                    Destroy(gameObject);
+                    MiddleManager.GetComponent<PhotonView>().RPC("changeColorMiddleCard", RpcTarget.AllViaServer, objectHit.GetComponent<CardColorSelector>().CardColor);
+                    //MiddleManager.changeColorMiddleCard(objectHit.GetComponent<CardColorSelector>().CardColor);
+                    PhotonView.Get(this).RPC("destroyObject", RpcTarget.AllViaServer);
                     TextMesh.SetActive(_initTextMeshState);
-                    GameManager.finishedTurn();
+                    PhotonView.Find(_playerID).RPC("turnFinished", RpcTarget.AllViaServer, false, _playerID);
+                    GameManager.GetComponent<PhotonView>().RPC("finishedTurn", RpcTarget.AllViaServer);
+                    //GameManager.finishedTurn();
                 }
             }
         }
+    }
+
+    [PunRPC]
+    public void assignPlayerID(short playerID) {
+        _playerID = System.Convert.ToInt32(playerID);
+    }
+
+    [PunRPC]
+    public void destroyObject() {
+        Destroy(gameObject);
     }
 
     // Start is called before the first frame update
@@ -60,7 +77,7 @@ public class ColorSelectorManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (GameManager.currentPlayer()) {
+        if (_playerID != -1 && PhotonView.Find(_playerID).IsMine) {
             calculateRayCast();
         }
     }

@@ -45,7 +45,8 @@ public class GameManager : MonoBehaviourPunCallbacks
                     res.Add(AvailablesCards[Random.Range(0, AvailablesCards.Count)]);
                     PhotonView.Get(this).RPC("removeCard", RpcTarget.AllViaServer, res[res.Count - 1].first, res[res.Count - 1].second);
                 }
-                MiddleManager.resetWithdraw();
+                MiddleManager.GetComponent<PhotonView>().RPC("resetWithdraw", RpcTarget.AllViaServer);
+                //MiddleManager.resetWithdraw();
             }else { //there will be only a card
                 res.Add(AvailablesCards[Random.Range(0, AvailablesCards.Count)]);
                 PhotonView.Get(this).RPC("removeCard", RpcTarget.AllViaServer, res[0].first, res[0].second);
@@ -76,12 +77,16 @@ public class GameManager : MonoBehaviourPunCallbacks
         RemainingCards = AvailablesCards.Count;
     }
 
+    public void RotateWithdrawCounter(int rot) {
+        MiddleManager.RotateWithdrawCounter(rot);
+    }
+
     void Start()
     {
         initAvailablesCards();
 
-        Pair<CardType, CardColor> card = drawCards(new RoundInfo(true, false, false, true, -1))[0];
-        MiddleManager.GetComponent<PhotonView>().RPC("addCardMiddle", RpcTarget.AllViaServer, card.first, card.second, new RoundInfo(true, false, false, true, -1));
+        Pair<CardType, CardColor> card = drawCards(new RoundInfo(true, false, false, true, -1, -1))[0];
+        MiddleManager.GetComponent<PhotonView>().RPC("addCardMiddle", RpcTarget.AllViaServer, card.first, card.second, new RoundInfo(true, false, false, true, -1, -1));
 
         if (MiddleManager.getMiddleColor() == CardColor.Black) MiddleManager.GetComponent<PhotonView>().RPC("changeColorMiddleCard", RpcTarget.AllViaServer, Enumerations.getRandomColor(0, 3));
 
@@ -91,7 +96,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     void printCard() {
 
         if (RemainingCards > 0) {
-            var temp = drawCards(new RoundInfo(true, false, false, true, -1))[0];
+            var temp = drawCards(new RoundInfo(true, false, false, true, -1, -1))[0];
             newCard = false;
         }
     }
@@ -106,18 +111,13 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (_senseGame) {
             _currentTurn++;
             if (_currentTurn == _players.Count) _currentTurn = 0;
-        }else {
+        } else {
             _currentTurn--;
             if (_currentTurn < 0) _currentTurn = _players.Count - 1;
         }
-
-
-        //tendria que ser ejecutado solamente por el master
-        if (PhotonNetwork.IsMasterClient) {
-            Debug.Log(_players[_currentTurn].ViewID);
-            _players[_currentTurn].RPC("giveTurn", RpcTarget.AllViaServer, new RoundInfo(true, MiddleManager.getCurrentWithdraw() > 0, MiddleManager.hasBlock(), false, System.Convert.ToInt16(_players[_currentTurn].ViewID)));
-            //_players[_currentTurn].GetComponent<PlayerManager>().giveTurn(new RoundInfo(true, MiddleManager.getCurrentWithdraw() > 0, MiddleManager.hasBlock(), false, _players[_currentTurn].GetComponent<PhotonView>().ViewID));
-        }
+        //Debug.Log(_players[_currentTurn].ViewID);
+        _players[_currentTurn].RPC("giveTurn", RpcTarget.AllViaServer, new RoundInfo(true, MiddleManager.getCurrentWithdraw() > 0, MiddleManager.hasBlock(), false, System.Convert.ToInt16(_players[_currentTurn].ViewID), -1/*it's not used to updated the rotation*/));
+        //_players[_currentTurn].GetComponent<PlayerManager>().giveTurn(new RoundInfo(true, MiddleManager.getCurrentWithdraw() > 0, MiddleManager.hasBlock(), false, _players[_currentTurn].GetComponent<PhotonView>().ViewID));
     }
 
     public bool selectingColor() {
@@ -126,7 +126,9 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     [PunRPC]
     public void finishedTurn() {
-        nextTurn();
+        if (PhotonNetwork.IsMasterClient) {
+            nextTurn();
+        }
     }
 
     void Update()
@@ -135,7 +137,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    void PlayerCreated(int _player) {
+    void PlayerCreated(int _player, int rot) {
         _players.Add(PhotonView.Find(_player));
 
         if (!PhotonView.Find(_player).IsMine) {
@@ -143,7 +145,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
 
         if (PhotonNetwork.IsMasterClient) {
-            PhotonView.Find(_player).RPC("initPlayer", RpcTarget.AllViaServer, _player);
+            PhotonView.Find(_player).RPC("initPlayer", RpcTarget.AllViaServer, _player, rot);
             //_player.gameObject.GetComponent<PlayerManager>().initPlayer(_player.ViewID);
 
             if (_players.Count == PhotonNetwork.CurrentRoom.PlayerCount) {

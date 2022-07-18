@@ -17,7 +17,11 @@ public class MiddleManager : MonoBehaviourPunCallbacks
     [SerializeField] GameObject WithdrawCounter;
 
     private int _currentWithdraw = 0;
-    private bool _usedMiddleCard = false;
+    public bool _usedMiddleCard = false;
+
+    public void RotateWithdrawCounter(int rot) {
+        WithdrawCounter.transform.localEulerAngles = new Vector3(WithdrawCounter.transform.localEulerAngles.x, rot, WithdrawCounter.transform.localEulerAngles.z);
+    }
 
     private void incrementWithdraw(Pair<CardType, CardColor> newC) {
         if (newC.first == CardType.Cplus2) _currentWithdraw += 2;
@@ -38,12 +42,19 @@ public class MiddleManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private void colorChangeNeeded(Pair<CardType, CardColor> newC) {
-        if (newC.first == CardType.Cplus4 || newC.first == CardType.CChangeColor) {
-            GameObject colorSelector = Instantiate(ColorSelectorPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+    private void colorChangeNeeded(Pair<CardType, CardColor> newC, RoundInfo roundInfo) {
+        if (newC.first == CardType.Cplus4 || newC.first == CardType.CChangeColor) { // why not using .second (color)???
+            GameObject colorSelector = PhotonNetwork.Instantiate(ColorSelectorPrefab.name, new Vector3(0, 0, 0), Quaternion.identity);
+
+            colorSelector.GetComponent<ColorSelectorManager>().assignPlayerID(roundInfo.playerID);
+
+            if (!PhotonView.Find(roundInfo.playerID).IsMine) {
+                colorSelector.layer = (int)Layers.IgnoreRayCast;
+            }
+            
             colorSelector.transform.SetParent(transform);
             colorSelector.transform.localPosition = new Vector3(0.0f, 0.5f, 0.0f);
-            colorSelector.transform.localEulerAngles = new Vector3(-115.0f, 0.0f, 0.0f);
+            colorSelector.transform.localEulerAngles = new Vector3(-115.0f, roundInfo.playerRotation, 0.0f);
         }
     }
 
@@ -81,7 +92,11 @@ public class MiddleManager : MonoBehaviourPunCallbacks
 
         //Debug.Log(validCard(newC, roundInfo));
         if (transform.childCount == 1 || (transform.childCount > 1)) {
-            _usedMiddleCard = false;
+            if (PhotonNetwork.IsMasterClient) {
+                PhotonView.Get(this).RPC("useMiddleCard", RpcTarget.AllViaServer, false);
+            }
+          
+            //_usedMiddleCard = false;
             moveAllCardsDown();
             GameObject newCard = Instantiate(CardPrefab, new Vector3(0, 0, 0), Quaternion.identity);
 
@@ -94,11 +109,12 @@ public class MiddleManager : MonoBehaviourPunCallbacks
 
             incrementWithdraw(newC);
             senseChanged(newC);
-            if (!roundInfo.automaticPlay) colorChangeNeeded(newC);
+            if (!roundInfo.automaticPlay && PhotonNetwork.IsMasterClient) colorChangeNeeded(newC, roundInfo);
             //Debug.Log("conseguido");
         }
     }
 
+    [PunRPC]
     public void resetWithdraw() { 
         _currentWithdraw = 0;
         WithdrawCounter.SetActive(false);
@@ -124,20 +140,29 @@ public class MiddleManager : MonoBehaviourPunCallbacks
     public bool hasRevers() {
         if (transform.childCount > 1 && !_usedMiddleCard) {
             if (transform.GetChild(0).GetComponent<CardManager>().CardType == CardType.CRevers) {
-                _usedMiddleCard = true;
+                PhotonView.Get(this).RPC("useMiddleCard", RpcTarget.AllViaServer, true);
+                //_usedMiddleCard = true;
                 return true;
             }
         }
+        PhotonView.Get(this).RPC("useMiddleCard", RpcTarget.AllViaServer, false);
         return false;
+    }
+
+    [PunRPC]
+    public void useMiddleCard(bool state) {
+        _usedMiddleCard = state;
     }
 
     public bool hasBlock() {
         if (transform.childCount > 1 && !_usedMiddleCard) {
             if (transform.GetChild(0).GetComponent<CardManager>().CardType == CardType.CBlock) {
-                _usedMiddleCard = true;
+                PhotonView.Get(this).RPC("useMiddleCard", RpcTarget.AllViaServer, true);
+                //_usedMiddleCard = true;
                 return true;
             }
         }
+        PhotonView.Get(this).RPC("useMiddleCard", RpcTarget.AllViaServer, false);
         return false;
     }
 

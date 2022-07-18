@@ -12,13 +12,15 @@ public class RoundInfo {
     public bool isBlocked;
     public bool automaticPlay;
     public short playerID;
+    public short playerRotation;
 
-    public RoundInfo(bool iHT, bool hTD, bool iB, bool aP, short p) {
+    public RoundInfo(bool iHT, bool hTD, bool iB, bool aP, short p, short rot) {
         isHisTurn = iHT;
         hasToDraw = hTD;
         isBlocked = iB;
         automaticPlay = aP;
         playerID = p;
+        playerRotation = rot;
     }
 
     public RoundInfo() {
@@ -27,9 +29,10 @@ public class RoundInfo {
         isBlocked = false;
         automaticPlay = false;
         playerID = -1;
+        playerRotation = -1;
     }
 
-    private const int SizeRoundInfo = 5 * 4;
+    private const int SizeRoundInfo = 6 * 4;
     public static readonly byte[] memRoundInfo = new byte[SizeRoundInfo];
 
     public static short SerializeRoundInfo(StreamBuffer outStream, object customobject) {
@@ -43,8 +46,9 @@ public class RoundInfo {
             Protocol.Serialize(Convert.ToInt16(vo.isBlocked), bytes, ref index);
             Protocol.Serialize(Convert.ToInt16(vo.automaticPlay), bytes, ref index);
             Protocol.Serialize(vo.playerID, bytes, ref index);
-            Debug.Log("1---> " + vo.playerID);
-            Debug.Log("Bytes: " + string.Join(" ", bytes));
+            Protocol.Serialize(vo.playerRotation, bytes, ref index);
+            //Debug.Log("1---> " + vo.playerID);
+            //Debug.Log("Bytes: " + string.Join(" ", bytes));
             outStream.Write(bytes, 0, SizeRoundInfo);
             
         }
@@ -63,7 +67,7 @@ public class RoundInfo {
             int index = 0;
             short temp;
 
-            Debug.Log("Bytes1: " + string.Join(" ", memRoundInfo));
+            //Debug.Log("Bytes1: " + string.Join(" ", memRoundInfo));
 
             Protocol.Deserialize(out temp, memRoundInfo, ref index);
             vo.isHisTurn = Convert.ToBoolean(temp);
@@ -74,7 +78,8 @@ public class RoundInfo {
             Protocol.Deserialize(out temp, memRoundInfo, ref index);
             vo.automaticPlay = Convert.ToBoolean(temp);
             Protocol.Deserialize(out vo.playerID, memRoundInfo, ref index);
-            Debug.Log("2--->" + vo.playerID);
+            Protocol.Deserialize(out vo.playerRotation, memRoundInfo, ref index);
+            //Debug.Log("2--->" + vo.playerID);
         }
 
         return vo;
