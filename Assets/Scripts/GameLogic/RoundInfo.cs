@@ -14,13 +14,13 @@ public class RoundInfo {
     public short playerID;
     public short playerRotation;
 
-    public RoundInfo(bool iHT, bool hTD, bool iB, bool aP, short p, short rot) {
-        isHisTurn = iHT;
-        hasToDraw = hTD;
-        isBlocked = iB;
-        automaticPlay = aP;
-        playerID = p;
-        playerRotation = rot;
+    public RoundInfo(bool _isHisTurn, bool _hasToDraw, bool _isBlocked, bool _automaticPlay, short _playerID, short _playerRotation) {
+        isHisTurn = _isHisTurn;
+        hasToDraw = _hasToDraw;
+        isBlocked = _isBlocked;
+        automaticPlay = _automaticPlay;
+        playerID = _playerID;
+        playerRotation = _playerRotation;
     }
 
     public RoundInfo() {
@@ -32,8 +32,8 @@ public class RoundInfo {
         playerRotation = -1;
     }
 
-    private const int SizeRoundInfo = 6 * 4;
-    public static readonly byte[] memRoundInfo = new byte[SizeRoundInfo];
+    private const int sizeRoundInfo = 6 * 4;
+    public static readonly byte[] memRoundInfo = new byte[sizeRoundInfo];
 
     //Modify the Start Method to implement a new Serialization
     public static short SerializeRoundInfo(StreamBuffer outStream, object customobject) {
@@ -50,21 +50,21 @@ public class RoundInfo {
             Protocol.Serialize(vo.playerRotation, bytes, ref index);
             //Debug.Log("1---> " + vo.playerID);
             //Debug.Log("Bytes: " + string.Join(" ", bytes));
-            outStream.Write(bytes, 0, SizeRoundInfo);
+            outStream.Write(bytes, 0, sizeRoundInfo);
             
         }
 
-        return SizeRoundInfo;
+        return sizeRoundInfo;
     }
 
     public static object DeserializeRoundInfo(StreamBuffer inStream, short length) {
         RoundInfo vo = new RoundInfo();
-        if (length != SizeRoundInfo) {
+        if (length != sizeRoundInfo) {
             return vo;
         }
 
         lock (memRoundInfo) {
-            inStream.Read(memRoundInfo, 0, SizeRoundInfo);
+            inStream.Read(memRoundInfo, 0, sizeRoundInfo);
             int index = 0;
             short temp;
 

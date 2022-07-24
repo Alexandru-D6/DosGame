@@ -35,11 +35,11 @@ public class Pair<T,K> : IEquatable<Pair<T, K>>
         return HashCode.Combine(first, second);
     }
 
-    public static bool operator ==(Pair<T, K> left, Pair<T, K> right) {
+    public static bool operator == (Pair<T, K> left, Pair<T, K> right) {
         return EqualityComparer<Pair<T, K>>.Default.Equals(left, right);
     }
 
-    public static bool operator !=(Pair<T, K> left, Pair<T, K> right) {
+    public static bool operator != (Pair<T, K> left, Pair<T, K> right) {
         return !(left == right);
     }
 }

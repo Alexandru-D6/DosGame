@@ -7,7 +7,7 @@ using Photon.Realtime;
 public class PlayerSpawner : MonoBehaviour
 {
     [SerializeField] GameObject playerPrefab;
-    [SerializeField] PhotonView GameManager;
+    [SerializeField] PhotonView gameManager;
 
     private void Start() {
         int rot = 0;
@@ -16,10 +16,12 @@ public class PlayerSpawner : MonoBehaviour
                 rot = player.Key-1;
             }
         }
+
+        //TODO: adapting the rotation and table to be able to place the exact count of players (if they are 3 create a triangular table??) 
         rot *= -90;
         GameObject newPlayer = PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(0,0,0), Quaternion.Euler(0,rot,0));
 
-        GameManager.RPC("PlayerCreated", RpcTarget.AllViaServer, newPlayer.GetComponent<PhotonView>().ViewID, rot);
+        gameManager.RPC("PlayerCreated", RpcTarget.AllViaServer, newPlayer.GetComponent<PhotonView>().ViewID, rot);
     }
 
 }

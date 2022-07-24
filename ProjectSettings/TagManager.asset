@@ -10,6 +10,7 @@ TagManager:
   - MiddleCard
   - WithdrawCounter
   - ColorSelector
+  - PauseMenu
   layers:
   - Default
   - TransparentFX

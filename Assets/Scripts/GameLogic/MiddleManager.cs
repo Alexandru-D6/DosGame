@@ -9,36 +9,36 @@ using Photon.Realtime;
 public class MiddleManager : MonoBehaviourPunCallbacks
 {
 
-    [SerializeField] GameManager GameManager;
+    [SerializeField] GameManager gameManager;
 
-    [SerializeField] GameObject CardPrefab;
-    [SerializeField] GameObject ReversPrefab;
-    [SerializeField] GameObject ColorSelectorPrefab;
-    [SerializeField] GameObject WithdrawCounter;
+    [SerializeField] GameObject cardPrefab;
+    [SerializeField] GameObject reversPrefab;
+    [SerializeField] GameObject colorSelectorPrefab;
+    [SerializeField] GameObject withdrawCounter;
 
-    private int _currentWithdraw = 0;
-    public bool _usedMiddleCard = false;
+    private int currentWithdraw = 0;
+    public bool usedMiddleCard = false;
 
     public int initElements = 2;
     public int middleCardStack = 5;
 
     public void RotateMiddle(int rot) {
-        transform.localEulerAngles = new Vector3(WithdrawCounter.transform.localEulerAngles.x, rot, WithdrawCounter.transform.localEulerAngles.z);
+        transform.localEulerAngles = new Vector3(withdrawCounter.transform.localEulerAngles.x, rot, withdrawCounter.transform.localEulerAngles.z);
     }
 
-    private void incrementWithdraw(Pair<CardType, CardColor> newC) {
-        if (newC.first == CardType.Cplus2) _currentWithdraw += 2;
-        else if (newC.first == CardType.Cplus4) _currentWithdraw += 4;
+    private void incrementWithdraw(Pair<CardType, CardColor> _newC) {
+        if (_newC.first == CardType.Cplus2) currentWithdraw += 2;
+        else if (_newC.first == CardType.Cplus4) currentWithdraw += 4;
 
-        if (_currentWithdraw > 0) {
-            WithdrawCounter.SetActive(true);
-            WithdrawCounter.GetComponent<TextMeshPro>().text = _currentWithdraw.ToString();
+        if (currentWithdraw > 0) {
+            withdrawCounter.SetActive(true);
+            withdrawCounter.GetComponent<TextMeshPro>().text = currentWithdraw.ToString();
         }
     }
 
-    private void senseChanged(Pair<CardType, CardColor> newC) {
-        if (newC.first == CardType.CRevers) {
-            GameObject revers = Instantiate(ReversPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+    private void senseChanged(Pair<CardType, CardColor> _newC) {
+        if (_newC.first == CardType.CRevers) {
+            GameObject revers = Instantiate(reversPrefab, new Vector3(0, 0, 0), Quaternion.identity);
             revers.transform.SetParent(transform);
             revers.transform.localPosition = new Vector3(0.0f, 2.0f, 0.0f);
             revers.transform.localEulerAngles = new Vector3(55.0f, 0.0f, 0.0f);
@@ -46,11 +46,11 @@ public class MiddleManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    private void colorChangeNeeded(CardType cardType, CardColor cardColor, RoundInfo roundInfo) {
-        if (cardType == CardType.Cplus4 || cardType == CardType.CChangeColor) { // why not using .second (color)???
-            GameObject colorSelector = Instantiate(ColorSelectorPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+    private void colorChangeNeeded(CardType _cardType, CardColor _cardColor, RoundInfo _roundInfo) {
+        if (_cardType == CardType.Cplus4 || _cardType == CardType.CChangeColor) { // why not using .second (color)???
+            GameObject colorSelector = Instantiate(colorSelectorPrefab, new Vector3(0, 0, 0), Quaternion.identity);
 
-            colorSelector.GetComponent<ColorSelectorManager>().assignPlayerID(roundInfo.playerID);
+            colorSelector.GetComponent<ColorSelectorManager>().assignPlayerID(_roundInfo.playerID);
         }
     }
 
@@ -59,7 +59,7 @@ public class MiddleManager : MonoBehaviourPunCallbacks
         Destroy(GameObject.FindGameObjectWithTag("ColorSelector"));
     }
 
-    public bool validCard(Pair<CardType, CardColor> newC, RoundInfo roundInfo) {
+    public bool validCard(Pair<CardType, CardColor> _newC, RoundInfo _roundInfo) {
         Pair<CardType, CardColor> oldC = new Pair<CardType, CardColor>(CardType.C0, CardColor.Blue);
 
         if (transform.childCount > initElements) {
@@ -72,14 +72,14 @@ public class MiddleManager : MonoBehaviourPunCallbacks
         //Debug.Log(roundInfo.isHisTurn + " -- " + roundInfo.isBlocked + " -- " + roundInfo.hasToDraw);
 
         //default
-        if (roundInfo.isHisTurn && !roundInfo.isBlocked) {
+        if (_roundInfo.isHisTurn && !_roundInfo.isBlocked) {
             //Debug.Log(roundInfo.isHisTurn + " -- " + roundInfo.isBlocked + " -- " + roundInfo.hasToDraw);
-            if (roundInfo.hasToDraw) {
-                if ((newC.first == CardType.Cplus2 && newC.second == oldC.second) || newC.first == CardType.Cplus4) return true;
+            if (_roundInfo.hasToDraw) {
+                if ((_newC.first == CardType.Cplus2 && _newC.second == oldC.second) || (_newC.first == oldC.first) || _newC.first == CardType.Cplus4) return true;
             } else {
-                if (oldC.first == newC.first) return true;
-                if (oldC.second == newC.second) return true;
-                if (newC.second == CardColor.Black) return true;
+                if (oldC.first == _newC.first) return true;
+                if (oldC.second == _newC.second) return true;
+                if (_newC.second == CardColor.Black) return true;
             }
         }
 
@@ -87,9 +87,9 @@ public class MiddleManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public void addCardMiddle(CardType newCa, CardColor newCb, RoundInfo roundInfo) {
+    public void addCardMiddle(CardType _newCa, CardColor _newCb, RoundInfo _roundInfo) {
         //Debug.Log("intentando añadir carta!");
-        Pair<CardType, CardColor> newC = new Pair<CardType, CardColor>(newCa, newCb);
+        Pair<CardType, CardColor> newC = new Pair<CardType, CardColor>(_newCa, _newCb);
 
         //Debug.Log(validCard(newC, roundInfo));
         if (transform.childCount == initElements || (transform.childCount > initElements)) {
@@ -99,7 +99,7 @@ public class MiddleManager : MonoBehaviourPunCallbacks
           
             //_usedMiddleCard = false;
             moveAllCardsDown();
-            GameObject newCard = Instantiate(CardPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+            GameObject newCard = Instantiate(cardPrefab, new Vector3(0, 0, 0), Quaternion.identity);
 
             newCard.transform.SetParent(transform);
             newCard.transform.SetSiblingIndex(0);
@@ -110,19 +110,19 @@ public class MiddleManager : MonoBehaviourPunCallbacks
 
             incrementWithdraw(newC);
             senseChanged(newC);
-            if (!roundInfo.automaticPlay && PhotonNetwork.IsMasterClient) PhotonView.Get(this).RPC("colorChangeNeeded", RpcTarget.AllViaServer, newC.first, newC.second, roundInfo);
+            if (!_roundInfo.automaticPlay && PhotonNetwork.IsMasterClient) PhotonView.Get(this).RPC("colorChangeNeeded", RpcTarget.AllViaServer, newC.first, newC.second, roundInfo);
             //Debug.Log("conseguido");
         }
     }
 
     [PunRPC]
     public void resetWithdraw() { 
-        _currentWithdraw = 0;
-        WithdrawCounter.SetActive(false);
-        WithdrawCounter.GetComponent<TextMeshPro>().text = _currentWithdraw.ToString();
+        currentWithdraw = 0;
+        withdrawCounter.SetActive(false);
+        withdrawCounter.GetComponent<TextMeshPro>().text = currentWithdraw.ToString();
     }
 
-    public int getCurrentWithdraw() { return _currentWithdraw; }
+    public int getCurrentWithdraw() { return currentWithdraw; }
 
     public CardColor getMiddleColor() {
         if (transform.childCount > initElements) {
@@ -139,7 +139,7 @@ public class MiddleManager : MonoBehaviourPunCallbacks
     }
 
     public bool hasRevers() {
-        if (transform.childCount > initElements && !_usedMiddleCard) {
+        if (transform.childCount > initElements && !usedMiddleCard) {
             if (transform.GetChild(0).GetComponent<CardManager>().CardType == CardType.CRevers) {
                 PhotonView.Get(this).RPC("useMiddleCard", RpcTarget.AllViaServer, true);
                 //_usedMiddleCard = true;
@@ -152,11 +152,11 @@ public class MiddleManager : MonoBehaviourPunCallbacks
 
     [PunRPC]
     public void useMiddleCard(bool state) {
-        _usedMiddleCard = state;
+        usedMiddleCard = state;
     }
 
     public bool hasBlock() {
-        if (transform.childCount > initElements && !_usedMiddleCard) {
+        if (transform.childCount > initElements && !usedMiddleCard) {
             if (transform.GetChild(0).GetComponent<CardManager>().CardType == CardType.CBlock) {
                 PhotonView.Get(this).RPC("useMiddleCard", RpcTarget.AllViaServer, true);
                 //_usedMiddleCard = true;
@@ -168,16 +168,16 @@ public class MiddleManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public void changeColorMiddleCard(CardColor color) {
+    public void changeColorMiddleCard(CardColor _color) {
         if (transform.childCount > initElements && getMiddleColor() == CardColor.Black) {
-            transform.GetChild(0).GetComponent<CardManager>().changeCard(new Pair<CardType, CardColor>(getMiddleType(), color));
+            transform.GetChild(0).GetComponent<CardManager>().changeCard(new Pair<CardType, CardColor>(getMiddleType(), _color));
         }
     }
 
     void moveAllCardsDown() {
         if (transform.childCount > middleCardStack + initElements) {
             CardManager toDelete = transform.GetChild(middleCardStack - 1).GetComponent<CardManager>();
-            GameManager.GetComponent<PhotonView>().RPC("addCard", RpcTarget.AllViaServer, toDelete.CardType, (toDelete.CardType == CardType.Cplus4 || toDelete.CardType == CardType.CChangeColor) ? CardColor.Black : toDelete.CardColor);
+            gameManager.GetComponent<PhotonView>().RPC("addCard", RpcTarget.AllViaServer, toDelete.CardType, (toDelete.CardType == CardType.Cplus4 || toDelete.CardType == CardType.CChangeColor) ? CardColor.Black : toDelete.CardColor);
             //GameManager.addCard(toDelete.CardType, (toDelete.CardType == CardType.Cplus4 || toDelete.CardType == CardType.CChangeColor) ? CardColor.Black : toDelete.CardColor);
 
             toDelete.transform.SetParent(null);

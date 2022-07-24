@@ -49,29 +49,29 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         UpdatePlayerList();
     }
 
-    public override void OnRoomListUpdate(List<RoomInfo> roomList) {
-        base.OnRoomListUpdate(roomList);
+    public override void OnRoomListUpdate(List<RoomInfo> _roomList) {
+        base.OnRoomListUpdate(_roomList);
         if (Time.time >= nextTimeUpdate) {
-            UpdateRoomList(roomList);
+            UpdateRoomList(_roomList);
             nextTimeUpdate = Time.time + timeBetweenUpdates;
         }
     }
 
-    private void UpdateRoomList(List<RoomInfo> list) {
+    private void UpdateRoomList(List<RoomInfo> _list) {
         foreach( RoomItem item in roomItemsList) {
             Destroy(item.gameObject);
         }
         roomItemsList.Clear();
 
-        foreach (RoomInfo room in list) {
+        foreach (RoomInfo room in _list) {
             RoomItem newRoom = Instantiate(roomItemPrefab, contentObject);
             newRoom.SetRoomName(room.Name);
             roomItemsList.Add(newRoom);
         }
     }
 
-    public void JoinRoom(string roomName) {
-        PhotonNetwork.JoinRoom(roomName);
+    public void JoinRoom(string _roomName) {
+        PhotonNetwork.JoinRoom(_roomName);
     }
 
     public void OnClickLeaveRoom() {
@@ -108,13 +108,13 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public override void OnPlayerEnteredRoom(Player newPlayer) {
-        base.OnPlayerEnteredRoom(newPlayer);
+    public override void OnPlayerEnteredRoom(Player _newPlayer) {
+        base.OnPlayerEnteredRoom(_newPlayer);
         UpdatePlayerList();
     }
 
-    public override void OnPlayerLeftRoom(Player otherPlayer) {
-        base.OnPlayerLeftRoom(otherPlayer);
+    public override void OnPlayerLeftRoom(Player _otherPlayer) {
+        base.OnPlayerLeftRoom(_otherPlayer);
         UpdatePlayerList();
     }
 
@@ -128,5 +128,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
     public void OnClickPlayButton() {
         PhotonNetwork.LoadLevel("Game");
+        PhotonNetwork.CurrentRoom.IsVisible = false;
+        PhotonNetwork.CurrentRoom.IsOpen = false;
     }
 }

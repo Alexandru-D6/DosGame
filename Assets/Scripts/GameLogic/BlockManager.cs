@@ -5,19 +5,19 @@ using UnityEngine;
 public class BlockManager : MonoBehaviour
 {
 
-    [SerializeField] MiddleManager MiddleManager;
+    [SerializeField] MiddleManager middleManager;
     [SerializeField] Material[] materials;
     [SerializeField] float blockDuration;
     // Start is called before the first frame update
     private void changeMaterial() {
-        int index = MiddleManager.getMiddleColor().getIndex();
+        int index = middleManager.getMiddleColor().getIndex();
         foreach (var mat in transform.GetComponentsInChildren<MeshRenderer>()) {
             mat.material = materials[index];
         }
     }
     // Start is called before the first frame update
     void Start() {
-        MiddleManager = GameObject.FindGameObjectWithTag("MiddleCard").GetComponent<MiddleManager>();
+        middleManager = GameObject.FindGameObjectWithTag("MiddleCard").GetComponent<MiddleManager>();
         changeMaterial();
         StartCoroutine(Countdown());
     }

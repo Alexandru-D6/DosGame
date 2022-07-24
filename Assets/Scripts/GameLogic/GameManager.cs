@@ -89,6 +89,13 @@ public class GameManager : MonoBehaviourPunCallbacks
         return ids;
     }
 
+    public int getLocalPlayerID() {
+        foreach (PhotonView p in _players) {
+            if (p.IsMine) return p.ViewID;
+        }
+        return -1;
+    }
+
     void Start()
     {
         initAvailablesCards();

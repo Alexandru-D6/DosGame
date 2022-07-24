@@ -7,41 +7,42 @@ using System;
 
 public class PlayerManager : MonoBehaviourPunCallbacks
 {
-    [SerializeField] Camera Camera;
-    [SerializeField] GameManager GameManager;
-    [SerializeField] DeckManager DeckManager;
+    [SerializeField] Camera camera;
+    [SerializeField] GameManager gameManager;
+    [SerializeField] DeckManager deckManager;
 
-    [SerializeField] GameObject Deck;
+    [SerializeField] GameObject deck;
 
-    [SerializeField] int InitCards;
+    [SerializeField] int initCards;
 
-    [SerializeField] GameObject CardPrefab;
-    [SerializeField] GameObject BlockPrefab;
+    [SerializeField] GameObject cardPrefab;
+    [SerializeField] GameObject blockPrefab;
 
-    [SerializeField] RoundInfo _roundInfo = new RoundInfo(false, false, false, false, -1, -1);
+    [SerializeField] RoundInfo roundInfo = new RoundInfo(false, false, false, false, -1, -1);
+    [SerializeField] bool gamePaused = false;
 
     private void Start() {
-        GameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+        gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
     private void CalculateRayCast() {
         RaycastHit hit;
-        Ray ray = Camera.ScreenPointToRay(Input.mousePosition);
+        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
 
         if (Physics.Raycast(ray, out hit)) {
             GameObject objectHit = hit.transform.parent.gameObject;
 
             GameObject _cardToRise = null;
 
-            if (objectHit.layer == LayerMask.NameToLayer(Layers.PlayerCard.getString()) && _roundInfo.isHisTurn && !GameManager.selectingColor()) {
+            if (objectHit.layer == LayerMask.NameToLayer(Layers.PlayerCard.getString()) && roundInfo.isHisTurn && !gameManager.selectingColor()) {
                 _cardToRise = objectHit;
             }
 
-            DeckManager.riseCardFromDeck(_cardToRise);
+            deckManager.riseCardFromDeck(_cardToRise);
 
-            if (Input.GetMouseButtonDown(0) && PhotonView.Get(this).IsMine && !GameManager.selectingColor()) {
+            if (Input.GetMouseButtonDown(0) && PhotonView.Get(this).IsMine && !gameManager.selectingColor()) {
                 if (objectHit.layer == LayerMask.NameToLayer(Layers.PlayerCard.getString())) {
-                    if (DeckManager.removeCardFromDeck(objectHit, _roundInfo)) {
+                    if (deckManager.removeCardFromDeck(objectHit, roundInfo)) {
                         LocalTurnFinished();
                     } else {
                         //TODO: some wiggle to notify that move is incorrect
@@ -56,13 +57,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     }
 
     public void DrawCards(int playerID) {
-        var cards = GameManager.drawCards(_roundInfo);
+        var cards = gameManager.drawCards(roundInfo);
 
         foreach(var card in cards) {
             PhotonView.Get(this).RPC("SpawnCard", RpcTarget.AllViaServer, card.first, card.second, playerID);
         }
 
-        if (_roundInfo.hasToDraw && PhotonView.Get(this).IsMine) {
+        if (roundInfo.hasToDraw && PhotonView.Get(this).IsMine) {
             LocalTurnFinished();
         }
     }
@@ -70,8 +71,8 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void SpawnCard(CardType a, CardColor b, int playerID) {
         if (PhotonView.Get(this).ViewID == playerID) {
-            GameObject newCard = Instantiate(CardPrefab, new Vector3(0, 0, 0), Quaternion.identity);
-            DeckManager.addNewCardToDeck(newCard, new Pair<CardType, CardColor>(a,b));
+            GameObject newCard = Instantiate(cardPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+            deckManager.addNewCardToDeck(newCard, new Pair<CardType, CardColor>(a,b));
 
             if (!PhotonView.Get(this).IsMine) {
                 newCard.layer = (int)Layers.IgnoreRayCast;
@@ -80,7 +81,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     }
 
     private void SpawnBlock() {
-        GameObject block = Instantiate(BlockPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+        GameObject block = Instantiate(blockPrefab, new Vector3(0, 0, 0), Quaternion.identity);
         block.transform.SetParent(transform);
         block.transform.localPosition = new Vector3(0.0f,2.0f,-6.2f);
         //Change color material and program autodelete
@@ -90,20 +91,20 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     public void turnFinished(bool state, int playerID) {
         Debug.Log(playerID + " --> " + PhotonView.Get(this).ViewID);
         if (PhotonView.Get(this).ViewID == playerID) {
-            _roundInfo.isHisTurn = state;
+            roundInfo.isHisTurn = state;
         }
     }
 
     [PunRPC]
     public void turnBlocked(bool state, int playerID) {
         if (PhotonView.Get(this).ViewID == playerID) {
-            _roundInfo.isHisTurn = state;
+            roundInfo.isHisTurn = state;
         }
     }
 
     private void LocalTurnFinished() {
-        PhotonView.Get(this).RPC("turnFinished", RpcTarget.AllViaServer, false, Convert.ToInt32(_roundInfo.playerID));
-        GameManager.GetComponent<PhotonView>().RPC("finishedTurn", RpcTarget.AllViaServer);
+        PhotonView.Get(this).RPC("turnFinished", RpcTarget.AllViaServer, false, Convert.ToInt32(roundInfo.playerID));
+        gameManager.GetComponent<PhotonView>().RPC("finishedTurn", RpcTarget.AllViaServer);
         //_roundInfo.isHisTurn = false;
         //GameManager.finishedTurn();
     }
@@ -113,14 +114,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         //Debug.Log("hello there");
         //Debug.Log("-->" + PhotonView.Get(this).ViewID + " - "+ roundInfo.playerID + " - " + roundInfo.isHisTurn);
         if (PhotonView.Get(this).ViewID == roundInfo.playerID) {
-            _roundInfo = roundInfo;
+            roundInfo = roundInfo;
 
             if (roundInfo.isBlocked) {
                 //show block 
                 SpawnBlock();
 
                 if (PhotonView.Get(this).IsMine) {
-                    PhotonView.Get(this).RPC("turnBlocked", RpcTarget.AllViaServer, false, Convert.ToInt32(_roundInfo.playerID));
+                    PhotonView.Get(this).RPC("turnBlocked", RpcTarget.AllViaServer, false, Convert.ToInt32(roundInfo.playerID));
                     LocalTurnFinished();
                 }
             }
@@ -130,19 +131,23 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void initPlayer(int playerID, int rot) {
         if (PhotonView.Get(this).ViewID == playerID && PhotonView.Get(this).IsMine) {
-            GameManager.RotateMiddle(rot);
-            _roundInfo.playerRotation = Convert.ToInt16(rot);
-            _roundInfo.playerID = Convert.ToInt16(playerID);
-            for (int i = 0; i < InitCards; ++i) {
+            gameManager.RotateMiddle(rot);
+            roundInfo.playerRotation = Convert.ToInt16(rot);
+            roundInfo.playerID = Convert.ToInt16(playerID);
+            for (int i = 0; i < initCards; ++i) {
                 DrawCards(playerID);
             }
         }
     }
 
+    public void pauseGame(bool state) {
+        gamePaused = state;
+    }
+
     // Update is called once per frame
     private void Update()
     {
-        if (_roundInfo.isHisTurn && PhotonView.Get(this).IsMine) {
+        if (roundInfo.isHisTurn && PhotonView.Get(this).IsMine && !gamePaused) {
             CalculateRayCast();
         }
     }
