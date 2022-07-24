@@ -130,7 +130,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     [PunRPC]
     public void initPlayer(int playerID, int rot) {
         if (PhotonView.Get(this).ViewID == playerID && PhotonView.Get(this).IsMine) {
-            GameManager.RotateWithdrawCounter(rot);
+            GameManager.RotateMiddle(rot);
             _roundInfo.playerRotation = Convert.ToInt16(rot);
             _roundInfo.playerID = Convert.ToInt16(playerID);
             for (int i = 0; i < InitCards; ++i) {

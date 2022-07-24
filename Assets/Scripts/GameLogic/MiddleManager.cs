@@ -19,8 +19,11 @@ public class MiddleManager : MonoBehaviourPunCallbacks
     private int _currentWithdraw = 0;
     public bool _usedMiddleCard = false;
 
-    public void RotateWithdrawCounter(int rot) {
-        WithdrawCounter.transform.localEulerAngles = new Vector3(WithdrawCounter.transform.localEulerAngles.x, rot, WithdrawCounter.transform.localEulerAngles.z);
+    public int initElements = 2;
+    public int middleCardStack = 5;
+
+    public void RotateMiddle(int rot) {
+        transform.localEulerAngles = new Vector3(WithdrawCounter.transform.localEulerAngles.x, rot, WithdrawCounter.transform.localEulerAngles.z);
     }
 
     private void incrementWithdraw(Pair<CardType, CardColor> newC) {
@@ -42,26 +45,24 @@ public class MiddleManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private void colorChangeNeeded(Pair<CardType, CardColor> newC, RoundInfo roundInfo) {
-        if (newC.first == CardType.Cplus4 || newC.first == CardType.CChangeColor) { // why not using .second (color)???
-            GameObject colorSelector = PhotonNetwork.Instantiate(ColorSelectorPrefab.name, new Vector3(0, 0, 0), Quaternion.identity);
+    [PunRPC]
+    private void colorChangeNeeded(CardType cardType, CardColor cardColor, RoundInfo roundInfo) {
+        if (cardType == CardType.Cplus4 || cardType == CardType.CChangeColor) { // why not using .second (color)???
+            GameObject colorSelector = Instantiate(ColorSelectorPrefab, new Vector3(0, 0, 0), Quaternion.identity);
 
             colorSelector.GetComponent<ColorSelectorManager>().assignPlayerID(roundInfo.playerID);
-
-            if (!PhotonView.Find(roundInfo.playerID).IsMine) {
-                colorSelector.layer = (int)Layers.IgnoreRayCast;
-            }
-            
-            colorSelector.transform.SetParent(transform);
-            colorSelector.transform.localPosition = new Vector3(0.0f, 0.5f, 0.0f);
-            colorSelector.transform.localEulerAngles = new Vector3(-115.0f, roundInfo.playerRotation, 0.0f);
         }
+    }
+
+    [PunRPC]
+    public void destroyColorSelector() {
+        Destroy(GameObject.FindGameObjectWithTag("ColorSelector"));
     }
 
     public bool validCard(Pair<CardType, CardColor> newC, RoundInfo roundInfo) {
         Pair<CardType, CardColor> oldC = new Pair<CardType, CardColor>(CardType.C0, CardColor.Blue);
 
-        if (transform.childCount > 1) {
+        if (transform.childCount > initElements) {
             oldC = transform.GetChild(0).GetComponent<CardManager>().getInfo();
         }
         //Debug.Log("Validation -->");
@@ -74,7 +75,7 @@ public class MiddleManager : MonoBehaviourPunCallbacks
         if (roundInfo.isHisTurn && !roundInfo.isBlocked) {
             //Debug.Log(roundInfo.isHisTurn + " -- " + roundInfo.isBlocked + " -- " + roundInfo.hasToDraw);
             if (roundInfo.hasToDraw) {
-                if (newC.first == CardType.Cplus2 || newC.first == CardType.Cplus4) return true;
+                if ((newC.first == CardType.Cplus2 && newC.second == oldC.second) || newC.first == CardType.Cplus4) return true;
             } else {
                 if (oldC.first == newC.first) return true;
                 if (oldC.second == newC.second) return true;
@@ -91,7 +92,7 @@ public class MiddleManager : MonoBehaviourPunCallbacks
         Pair<CardType, CardColor> newC = new Pair<CardType, CardColor>(newCa, newCb);
 
         //Debug.Log(validCard(newC, roundInfo));
-        if (transform.childCount == 1 || (transform.childCount > 1)) {
+        if (transform.childCount == initElements || (transform.childCount > initElements)) {
             if (PhotonNetwork.IsMasterClient) {
                 PhotonView.Get(this).RPC("useMiddleCard", RpcTarget.AllViaServer, false);
             }
@@ -109,7 +110,7 @@ public class MiddleManager : MonoBehaviourPunCallbacks
 
             incrementWithdraw(newC);
             senseChanged(newC);
-            if (!roundInfo.automaticPlay && PhotonNetwork.IsMasterClient) colorChangeNeeded(newC, roundInfo);
+            if (!roundInfo.automaticPlay && PhotonNetwork.IsMasterClient) PhotonView.Get(this).RPC("colorChangeNeeded", RpcTarget.AllViaServer, newC.first, newC.second, roundInfo);
             //Debug.Log("conseguido");
         }
     }
@@ -124,21 +125,21 @@ public class MiddleManager : MonoBehaviourPunCallbacks
     public int getCurrentWithdraw() { return _currentWithdraw; }
 
     public CardColor getMiddleColor() {
-        if (transform.childCount > 1) {
+        if (transform.childCount > initElements) {
             return transform.GetChild(0).GetComponent<CardManager>().CardColor;
         }
         return CardColor.Black;
     }
 
     public CardType getMiddleType() {
-        if (transform.childCount > 1) {
+        if (transform.childCount > initElements) {
             return transform.GetChild(0).GetComponent<CardManager>().CardType;
         }
         return CardType.C0;
     }
 
     public bool hasRevers() {
-        if (transform.childCount > 1 && !_usedMiddleCard) {
+        if (transform.childCount > initElements && !_usedMiddleCard) {
             if (transform.GetChild(0).GetComponent<CardManager>().CardType == CardType.CRevers) {
                 PhotonView.Get(this).RPC("useMiddleCard", RpcTarget.AllViaServer, true);
                 //_usedMiddleCard = true;
@@ -155,7 +156,7 @@ public class MiddleManager : MonoBehaviourPunCallbacks
     }
 
     public bool hasBlock() {
-        if (transform.childCount > 1 && !_usedMiddleCard) {
+        if (transform.childCount > initElements && !_usedMiddleCard) {
             if (transform.GetChild(0).GetComponent<CardManager>().CardType == CardType.CBlock) {
                 PhotonView.Get(this).RPC("useMiddleCard", RpcTarget.AllViaServer, true);
                 //_usedMiddleCard = true;
@@ -168,14 +169,14 @@ public class MiddleManager : MonoBehaviourPunCallbacks
 
     [PunRPC]
     public void changeColorMiddleCard(CardColor color) {
-        if (transform.childCount > 1 && getMiddleColor() == CardColor.Black) {
+        if (transform.childCount > initElements && getMiddleColor() == CardColor.Black) {
             transform.GetChild(0).GetComponent<CardManager>().changeCard(new Pair<CardType, CardColor>(getMiddleType(), color));
         }
     }
 
     void moveAllCardsDown() {
-        if (transform.childCount > 5) {
-            CardManager toDelete = transform.GetChild(4).GetComponent<CardManager>();
+        if (transform.childCount > middleCardStack + initElements) {
+            CardManager toDelete = transform.GetChild(middleCardStack - 1).GetComponent<CardManager>();
             GameManager.GetComponent<PhotonView>().RPC("addCard", RpcTarget.AllViaServer, toDelete.CardType, (toDelete.CardType == CardType.Cplus4 || toDelete.CardType == CardType.CChangeColor) ? CardColor.Black : toDelete.CardColor);
             //GameManager.addCard(toDelete.CardType, (toDelete.CardType == CardType.Cplus4 || toDelete.CardType == CardType.CChangeColor) ? CardColor.Black : toDelete.CardColor);
 
@@ -183,7 +184,7 @@ public class MiddleManager : MonoBehaviourPunCallbacks
             Destroy(toDelete.gameObject);
         }
 
-        for (int i = 0; i < transform.childCount-1; ++i) {
+        for (int i = 0; i < transform.childCount-initElements; ++i) {
             Transform child = transform.GetChild(i);
             child.localPosition = new Vector3(0.0f,child.localPosition.y - 0.01f,0.0f);
         }

@@ -35,6 +35,7 @@ public class RoundInfo {
     private const int SizeRoundInfo = 6 * 4;
     public static readonly byte[] memRoundInfo = new byte[SizeRoundInfo];
 
+    //Modify the Start Method to implement a new Serialization
     public static short SerializeRoundInfo(StreamBuffer outStream, object customobject) {
         RoundInfo vo = (RoundInfo)customobject;
 

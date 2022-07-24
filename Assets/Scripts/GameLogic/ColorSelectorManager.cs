@@ -10,9 +10,6 @@ public class ColorSelectorManager : MonoBehaviourPunCallbacks
     [SerializeField] MiddleManager MiddleManager;
     [SerializeField] GameManager GameManager;
 
-    [SerializeField] GameObject TextMesh;
-    private bool _initTextMeshState = false;
-
     [SerializeField] float incrementGameobject = 2.5f;
 
     public int _playerID = -1;
@@ -42,8 +39,9 @@ public class ColorSelectorManager : MonoBehaviourPunCallbacks
                 if (objectHit.layer == LayerMask.NameToLayer(Layers.ColorSelector.getString())) {
                     MiddleManager.GetComponent<PhotonView>().RPC("changeColorMiddleCard", RpcTarget.AllViaServer, objectHit.GetComponent<CardColorSelector>().CardColor);
                     //MiddleManager.changeColorMiddleCard(objectHit.GetComponent<CardColorSelector>().CardColor);
-                    PhotonView.Get(this).RPC("destroyObject", RpcTarget.AllViaServer);
-                    TextMesh.SetActive(_initTextMeshState);
+                    
+                    MiddleManager.GetComponent<PhotonView>().RPC("destroyColorSelector", RpcTarget.AllViaServer);
+                    
                     PhotonView.Find(_playerID).RPC("turnFinished", RpcTarget.AllViaServer, false, _playerID);
                     GameManager.GetComponent<PhotonView>().RPC("finishedTurn", RpcTarget.AllViaServer);
                     //GameManager.finishedTurn();
@@ -52,26 +50,27 @@ public class ColorSelectorManager : MonoBehaviourPunCallbacks
         }
     }
 
-    [PunRPC]
     public void assignPlayerID(short playerID) {
         _playerID = System.Convert.ToInt32(playerID);
-    }
 
-    [PunRPC]
-    public void destroyObject() {
-        Destroy(gameObject);
+        if(!PhotonView.Find(System.Convert.ToInt32(playerID)).IsMine) {
+            gameObject.layer = (int)Layers.IgnoreRayCast;
+        }
+
+        transform.SetParent(MiddleManager.transform);
+        transform.localPosition = new Vector3(0.0f, 0.5f, 0.0f);
+        transform.localEulerAngles = new Vector3(-125.0f, 0.0f, 0.0f);
     }
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         Camera = GameObject.FindGameObjectWithTag("Player").GetComponentInChildren<Camera>();
         MiddleManager = GameObject.FindGameObjectWithTag("MiddleCard").GetComponent<MiddleManager>();
         GameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
-        TextMesh = GameObject.FindGameObjectWithTag("WithdrawCounter");
 
-        _initTextMeshState = TextMesh.activeSelf;
-        TextMesh.SetActive(false);
+        //_initTextMeshState = TextMesh.activeSelf;
+        //TextMesh.SetActive(false);
     }
 
     // Update is called once per frame

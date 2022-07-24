@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5977618017573663007}
   m_Layer: 10
   m_Name: ColorSelector
-  m_TagString: Untagged
+  m_TagString: ColorSelector
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -52,7 +52,6 @@ MonoBehaviour:
   Camera: {fileID: 0}
   MiddleManager: {fileID: 0}
   GameManager: {fileID: 0}
-  TextMesh: {fileID: 0}
   incrementGameobject: 2.5
   _playerID: -1
 --- !u!114 &5977618017573663007

@@ -77,8 +77,16 @@ public class GameManager : MonoBehaviourPunCallbacks
         RemainingCards = AvailablesCards.Count;
     }
 
-    public void RotateWithdrawCounter(int rot) {
-        MiddleManager.RotateWithdrawCounter(rot);
+    public void RotateMiddle(int rot) {
+        MiddleManager.RotateMiddle(rot);
+    }
+
+    public List<int> getPlayersID() {
+        List<int> ids = new List<int>();
+        foreach (PhotonView p in _players) {
+            ids.Add(p.ViewID);
+        }
+        return ids;
     }
 
     void Start()

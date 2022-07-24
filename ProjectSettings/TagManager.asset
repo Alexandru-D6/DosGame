@@ -9,6 +9,7 @@ TagManager:
   - GameManager
   - MiddleCard
   - WithdrawCounter
+  - ColorSelector
   layers:
   - Default
   - TransparentFX
