@@ -6,7 +6,7 @@ using Photon.Realtime;
 
 public class ColorSelectorManager : MonoBehaviourPunCallbacks
 {
-    [SerializeField] Camera camera;
+    [SerializeField] new Camera camera;
     [SerializeField] MiddleManager middleManager;
     [SerializeField] GameManager gameManager;
 

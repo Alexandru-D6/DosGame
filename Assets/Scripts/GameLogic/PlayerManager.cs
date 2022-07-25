@@ -7,7 +7,7 @@ using System;
 
 public class PlayerManager : MonoBehaviourPunCallbacks
 {
-    [SerializeField] Camera camera;
+    [SerializeField] new Camera camera;
     [SerializeField] GameManager gameManager;
     [SerializeField] DeckManager deckManager;
 
@@ -110,13 +110,13 @@ public class PlayerManager : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
-    public void giveTurn(RoundInfo roundInfo) {
+    public void giveTurn(RoundInfo _roundInfo) {
         //Debug.Log("hello there");
         //Debug.Log("-->" + PhotonView.Get(this).ViewID + " - "+ roundInfo.playerID + " - " + roundInfo.isHisTurn);
-        if (PhotonView.Get(this).ViewID == roundInfo.playerID) {
-            roundInfo = roundInfo;
+        if (PhotonView.Get(this).ViewID == _roundInfo.playerID) {
+            roundInfo = _roundInfo;
 
-            if (roundInfo.isBlocked) {
+            if (_roundInfo.isBlocked) {
                 //show block 
                 SpawnBlock();
 

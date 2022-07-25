@@ -422,7 +422,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 1223847678838146510, guid: db0673d77661d89468c793e25e400596, type: 3}
-  GameManager: {fileID: 1549061559}
+  gameManager: {fileID: 1549061559}
 --- !u!4 &112360690
 Transform:
   m_ObjectHideFlags: 0
@@ -818,12 +818,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc3689c9a4c75fb45862e12d97993929, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GameManager: {fileID: 1549061557}
-  CardPrefab: {fileID: 2063195443874550020, guid: 8bf5daa9c53c0014b9e7e13e5ec39614, type: 3}
-  ReversPrefab: {fileID: 7856414549215131852, guid: 1d22ee6e3fd404a4f9f2657941521da2, type: 3}
-  ColorSelectorPrefab: {fileID: 2990229544816622614, guid: bdf1d6cea6863874eafbf2861e10f88b, type: 3}
-  WithdrawCounter: {fileID: 1700830161}
-  _usedMiddleCard: 0
+  gameManager: {fileID: 1549061557}
+  cardPrefab: {fileID: 2063195443874550020, guid: 8bf5daa9c53c0014b9e7e13e5ec39614, type: 3}
+  reversPrefab: {fileID: 7856414549215131852, guid: 1d22ee6e3fd404a4f9f2657941521da2, type: 3}
+  colorSelectorPrefab: {fileID: 2990229544816622614, guid: bbc19cde316e4d04a85fce435305a5a3, type: 3}
+  withdrawCounter: {fileID: 1700830161}
+  usedMiddleCard: 0
   initElements: 2
   middleCardStack: 5
 --- !u!114 &1109257468
@@ -1200,7 +1200,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pauseMenu: {fileID: 634306439}
-  GameManager: {fileID: 0}
+  GameManager: {fileID: 1549061557}
 --- !u!1 &1629622021
 GameObject:
   m_ObjectHideFlags: 0

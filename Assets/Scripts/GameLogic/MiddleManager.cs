@@ -110,7 +110,7 @@ public class MiddleManager : MonoBehaviourPunCallbacks
 
             incrementWithdraw(newC);
             senseChanged(newC);
-            if (!_roundInfo.automaticPlay && PhotonNetwork.IsMasterClient) PhotonView.Get(this).RPC("colorChangeNeeded", RpcTarget.AllViaServer, newC.first, newC.second, roundInfo);
+            if (!_roundInfo.automaticPlay && PhotonNetwork.IsMasterClient) PhotonView.Get(this).RPC("colorChangeNeeded", RpcTarget.AllViaServer, newC.first, newC.second, _roundInfo);
             //Debug.Log("conseguido");
         }
     }

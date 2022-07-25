@@ -8,7 +8,7 @@ public class DeckManager : MonoBehaviourPunCallbacks
 {
     //List<Pair<Pair<CardType, CardColor>, GameObject>> PlayerCards = new List<Pair<Pair<CardType, CardColor>, GameObject>>();
     private GameObject risedCard;
-    private GameManager gameManager;
+    [SerializeField] GameManager gameManager;
     [SerializeField] MiddleManager middleManager;
 
     [SerializeField] float maxAngle;
@@ -155,7 +155,7 @@ public class DeckManager : MonoBehaviourPunCallbacks
             CardManager child = transform.GetChild(i).GetComponent<CardManager>();
             float prevZ = transform.GetChild(i - 1).GetComponent<CardManager>().getAngle();
 
-            if (child.CardColor == risedCard.GetComponent<CardManager>().CardColor || transform.GetChild(i - 1).GetComponent<CardManager>().CardColor == _risedCard.GetComponent<CardManager>().CardColor) {
+            if (child.CardColor == risedCard.GetComponent<CardManager>().CardColor || transform.GetChild(i - 1).GetComponent<CardManager>().CardColor == risedCard.GetComponent<CardManager>().CardColor) {
                 child.setAngle(prevZ - maxSeparation);
             } else {
                 if (compact == -1.0f) {
