@@ -56,6 +56,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks
         }
     }
 
+    public int deckSize() {
+        return deck.GetComponent<DeckManager>().deckSize();
+    }
+
     public void DrawCards(int playerID) {
         var cards = gameManager.drawCards(roundInfo);
 

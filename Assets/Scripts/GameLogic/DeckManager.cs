@@ -19,6 +19,10 @@ public class DeckManager : MonoBehaviourPunCallbacks
         middleManager = GameObject.FindGameObjectWithTag("MiddleCard").GetComponent<MiddleManager>();
     }
 
+    public int deckSize() {
+        return transform.childCount;
+    }
+
     //TODO: implement Binary Search to improve performance
     private void newCard(GameObject _newCard, Pair<CardType, CardColor> _card) {
         for (int i = transform.childCount-2; i >= 0; --i) {

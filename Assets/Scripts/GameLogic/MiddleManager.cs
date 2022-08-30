@@ -167,6 +167,10 @@ public class MiddleManager : MonoBehaviourPunCallbacks
         return false;
     }
 
+    public int sizeMiddleCards() {
+        return (transform.childCount - initElements);
+    }
+
     [PunRPC]
     public void changeColorMiddleCard(CardColor _color) {
         if (transform.childCount > initElements && getMiddleColor() == CardColor.Black) {

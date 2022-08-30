@@ -135,6 +135,18 @@ public class GameManager : MonoBehaviourPunCallbacks
         //_players[_currentTurn].GetComponent<PlayerManager>().giveTurn(new RoundInfo(true, MiddleManager.getCurrentWithdraw() > 0, MiddleManager.hasBlock(), false, _players[_currentTurn].GetComponent<PhotonView>().ViewID));
     }
 
+    void checkFinishedGame() {
+        //Add here more conditions to satify to trigger an end game
+        bool condition = MiddleManager.getCurrentWithdraw() == 0 && MiddleManager.sizeMiddleCards() > 0;
+        foreach (var player in _players) {
+            if (player.gameObject.GetComponent<PlayerManager>().deckSize() == 0 && condition) {
+                PhotonView.Get(this).RPC("theEndGame", RpcTarget.AllViaServer);
+                //theEndGame();
+                break;
+            }
+        }
+    }
+
     public bool selectingColor() {
         return MiddleManager.transform.Find("ColorSelector(Clone)") != null;
     }
@@ -143,8 +155,15 @@ public class GameManager : MonoBehaviourPunCallbacks
     public void finishedTurn() {
         if (PhotonNetwork.IsMasterClient) {
             nextTurn();
+            checkFinishedGame();
         }
     }
+
+    [PunRPC]
+    public void theEndGame() {
+        //show another scene to display stats
+        PhotonNetwork.LeaveRoom();
+    } 
 
     void Update()
     {
