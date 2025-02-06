@@ -31,9 +31,6 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         lobbyPanel.SetActive(true);
         roomPanel.SetActive(false);
     }
-    public void Start() {
-        PhotonNetwork.JoinLobby();
-    }
 
     public void OnClickCreate() {
         if (roomInputField.text.Length >= 3) {

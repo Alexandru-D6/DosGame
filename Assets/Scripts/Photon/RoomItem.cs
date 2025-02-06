@@ -9,7 +9,7 @@ public class RoomItem : MonoBehaviour
     LobbyManager manager;
 
     private void Start() {
-        manager = FindObjectOfType<LobbyManager>();
+        manager = FindFirstObjectByType<LobbyManager>();
     }
 
     public void SetRoomName(string _roomName) {

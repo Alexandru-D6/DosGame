@@ -139,9 +139,10 @@ public class GameManager : MonoBehaviourPunCallbacks
         //Add here more conditions to satify to trigger an end game
         bool condition = MiddleManager.getCurrentWithdraw() == 0 && MiddleManager.sizeMiddleCards() > 0;
         foreach (var player in _players) {
-            if (player.gameObject.GetComponent<PlayerManager>().deckSize() == 0 && condition) {
+            PlayerManager pm = player.GetComponent<PlayerManager>();
+            if (pm.isInitialized() && pm.deckSize() == 0 && condition) {
                 PhotonView.Get(this).RPC("theEndGame", RpcTarget.AllViaServer);
-                //theEndGame();
+                // theEndGame();
                 break;
             }
         }

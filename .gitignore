@@ -61,6 +61,8 @@ sysinfo.txt
 *.unitypackage
 *.app
 
+.idea
+
 # Crashlytics generated file
 crashlytics-build.properties
 
@@ -70,3 +72,6 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+/[Aa]ssets/Plugins
+/[Aa]ssets/TextMesh Pro/*
+/[Aa]ssets/TextMesh Pro.meta

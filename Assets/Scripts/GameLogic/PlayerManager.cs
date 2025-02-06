@@ -20,6 +20,7 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     [SerializeField] RoundInfo roundInfo = new RoundInfo(false, false, false, false, -1, -1);
     [SerializeField] bool gamePaused = false;
+    bool playerInitialized = false;
 
     private void Start() {
         gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
@@ -58,6 +59,10 @@ public class PlayerManager : MonoBehaviourPunCallbacks
 
     public int deckSize() {
         return deck.GetComponent<DeckManager>().deckSize();
+    }
+
+    public bool isInitialized() {
+        return playerInitialized;
     }
 
     public void DrawCards(int playerID) {
@@ -141,6 +146,14 @@ public class PlayerManager : MonoBehaviourPunCallbacks
             for (int i = 0; i < initCards; ++i) {
                 DrawCards(playerID);
             }
+            PhotonView.Get(this).RPC("finishPlayerInitialization", RpcTarget.AllViaServer, playerID);
+        }
+    }
+
+    [PunRPC]
+    public void finishPlayerInitialization(int playerID) {
+        if (PhotonView.Get(this).ViewID == playerID && PhotonView.Get(this).IsMine) {
+            playerInitialized = true;
         }
     }
 
